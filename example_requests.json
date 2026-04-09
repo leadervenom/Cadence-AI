@@ -1,0 +1,330 @@
+{
+  "examples": {
+
+    "1_generate_running_order": {
+      "endpoint": "POST http://localhost:8000/generate-running-order",
+      "description": "Generate a full event running order",
+      "body": {
+        "event": {
+          "id": "EVT-2024-001",
+          "name": "Asia Pacific Leadership Summit 2024",
+          "date": "2024-11-15",
+          "venue": "Marina Bay Sands Convention Centre, Singapore",
+          "start_time": "08:30",
+          "end_time": "18:00",
+          "speakers": [
+            {
+              "id": "SPK-001",
+              "name": "Dr. Sarah Chen",
+              "title": "Keynote: The Future of AI Governance",
+              "organization": "World Economic Forum",
+              "duration_minutes": 45,
+              "requirements": ["projector", "clicker", "podium"]
+            },
+            {
+              "id": "SPK-002",
+              "name": "Minister Raj Pillai",
+              "title": "Opening Address",
+              "organization": "Ministry of Trade & Industry",
+              "duration_minutes": 20,
+              "requirements": ["podium", "teleprompter"]
+            },
+            {
+              "id": "SPK-003",
+              "name": "Prof. Aiko Tanaka",
+              "title": "Panel: Sustainable Innovation",
+              "organization": "Tokyo University",
+              "duration_minutes": 30,
+              "requirements": ["panel_table"]
+            },
+            {
+              "id": "SPK-004",
+              "name": "James Whitfield",
+              "title": "Fireside Chat: Scale & Leadership",
+              "organization": "Apex Capital Partners",
+              "duration_minutes": 35,
+              "requirements": ["two_chairs", "projector"]
+            },
+            {
+              "id": "SPK-005",
+              "name": "Dr. Amara Osei",
+              "title": "Closing Keynote: Africa-Asia Partnerships",
+              "organization": "African Development Bank",
+              "duration_minutes": 40,
+              "requirements": ["projector", "podium"]
+            }
+          ],
+          "breaks": [
+            { "start": "10:30", "end": "11:00", "label": "Morning Coffee Break" },
+            { "start": "13:00", "end": "14:00", "label": "Networking Lunch" },
+            { "start": "15:30", "end": "15:50", "label": "Afternoon Tea Break" }
+          ],
+          "constraints": [
+            {
+              "type": "must_precede",
+              "target_id": "SPK-001",
+              "reference_id": "SPK-002"
+            },
+            {
+              "type": "fixed_time",
+              "target_id": "SPK-002",
+              "value": null
+            },
+            {
+              "type": "gap_after",
+              "target_id": "SPK-003",
+              "value": 10
+            }
+          ]
+        }
+      }
+    },
+
+    "2_generate_seating": {
+      "endpoint": "POST http://localhost:8000/generate-seating",
+      "description": "Generate a VIP seating layout respecting hierarchy",
+      "body": {
+        "event_id": "EVT-2024-001",
+        "head_table_guest_ids": ["G001", "G002", "G003"],
+        "guests": [
+          {
+            "id": "G001",
+            "name": "Minister Raj Pillai",
+            "title": "Minister of Trade & Industry",
+            "organization": "Government of Singapore",
+            "vip_level": 5,
+            "rank": 1,
+            "role": "official",
+            "dietary": ["halal"],
+            "seating_constraints": [],
+            "accessibility": false
+          },
+          {
+            "id": "G002",
+            "name": "Dr. Sarah Chen",
+            "title": "Director General",
+            "organization": "World Economic Forum",
+            "vip_level": 5,
+            "rank": 2,
+            "role": "keynote_speaker",
+            "dietary": ["vegetarian"],
+            "seating_constraints": [],
+            "accessibility": false
+          },
+          {
+            "id": "G003",
+            "name": "Ambassador Liu Wei",
+            "title": "Ambassador",
+            "organization": "Embassy of China",
+            "vip_level": 5,
+            "rank": 3,
+            "role": "vip_guest",
+            "dietary": [],
+            "seating_constraints": [],
+            "accessibility": false
+          },
+          {
+            "id": "G004",
+            "name": "James Whitfield",
+            "title": "Managing Partner",
+            "organization": "Apex Capital Partners",
+            "vip_level": 4,
+            "rank": 4,
+            "role": "sponsor",
+            "dietary": [],
+            "seating_constraints": ["away_from:G007"],
+            "accessibility": false
+          },
+          {
+            "id": "G005",
+            "name": "Dr. Amara Osei",
+            "title": "Vice President",
+            "organization": "African Development Bank",
+            "vip_level": 4,
+            "rank": 5,
+            "role": "keynote_speaker",
+            "dietary": ["kosher"],
+            "seating_constraints": [],
+            "accessibility": false
+          },
+          {
+            "id": "G006",
+            "name": "Prof. Aiko Tanaka",
+            "title": "Professor & Chair",
+            "organization": "Tokyo University",
+            "vip_level": 3,
+            "rank": 6,
+            "role": "vip_guest",
+            "dietary": [],
+            "seating_constraints": [],
+            "accessibility": false
+          },
+          {
+            "id": "G007",
+            "name": "Helena Voss",
+            "title": "CEO",
+            "organization": "NordTech AG",
+            "vip_level": 3,
+            "rank": 7,
+            "role": "sponsor",
+            "dietary": ["gluten_free"],
+            "seating_constraints": ["away_from:G004"],
+            "accessibility": false
+          },
+          {
+            "id": "G008",
+            "name": "Mr. Tan Boon Kheng",
+            "title": "Permanent Secretary",
+            "organization": "Ministry of Finance",
+            "vip_level": 4,
+            "rank": 4,
+            "role": "official",
+            "dietary": [],
+            "seating_constraints": [],
+            "accessibility": true
+          }
+        ],
+        "tables": [
+          { "table_id": "T01", "table_number": 1, "capacity": 6, "zone": "head", "accessibility": true },
+          { "table_id": "T02", "table_number": 2, "capacity": 8, "zone": "front", "accessibility": false },
+          { "table_id": "T03", "table_number": 3, "capacity": 8, "zone": "front", "accessibility": true },
+          { "table_id": "T04", "table_number": 4, "capacity": 10, "zone": "middle", "accessibility": false },
+          { "table_id": "T05", "table_number": 5, "capacity": 10, "zone": "middle", "accessibility": false }
+        ]
+      }
+    },
+
+    "3_update_delay": {
+      "endpoint": "POST http://localhost:8000/update-event",
+      "description": "Push a 20-minute delay to item item_003 and cascade all subsequent items",
+      "body": {
+        "event_id": "EVT-2024-001",
+        "current_running_order": {
+          "event_id": "EVT-2024-001",
+          "event_name": "Asia Pacific Leadership Summit 2024",
+          "generated_at": "2024-11-15T08:00:00",
+          "total_duration_minutes": 570,
+          "items": [
+            {
+              "sequence": 1,
+              "item_id": "item_001",
+              "title": "Opening Address",
+              "type": "keynote",
+              "start_time": "08:30",
+              "end_time": "08:50",
+              "duration_minutes": 20,
+              "speaker_id": "SPK-002",
+              "speaker_name": "Minister Raj Pillai",
+              "location": "Main Hall",
+              "notes": null,
+              "status": "completed"
+            },
+            {
+              "sequence": 2,
+              "item_id": "item_002",
+              "title": "Keynote: The Future of AI Governance",
+              "type": "keynote",
+              "start_time": "08:50",
+              "end_time": "09:35",
+              "duration_minutes": 45,
+              "speaker_id": "SPK-001",
+              "speaker_name": "Dr. Sarah Chen",
+              "location": "Main Hall",
+              "notes": null,
+              "status": "completed"
+            },
+            {
+              "sequence": 3,
+              "item_id": "item_003",
+              "title": "Panel: Sustainable Innovation",
+              "type": "panel",
+              "start_time": "09:35",
+              "end_time": "10:05",
+              "duration_minutes": 30,
+              "speaker_id": "SPK-003",
+              "speaker_name": "Prof. Aiko Tanaka",
+              "location": "Main Hall",
+              "notes": null,
+              "status": "scheduled"
+            },
+            {
+              "sequence": 4,
+              "item_id": "item_004",
+              "title": "Morning Coffee Break",
+              "type": "break",
+              "start_time": "10:30",
+              "end_time": "11:00",
+              "duration_minutes": 30,
+              "speaker_id": null,
+              "speaker_name": null,
+              "location": "Foyer",
+              "notes": null,
+              "status": "scheduled"
+            }
+          ],
+          "warnings": []
+        },
+        "current_seating": null,
+        "updates": [
+          {
+            "type": "delay",
+            "target_id": "item_003",
+            "delta_minutes": 20,
+            "new_value": null,
+            "reason": "Technical setup overrun"
+          }
+        ]
+      }
+    },
+
+    "4_update_vip_removal": {
+      "endpoint": "POST http://localhost:8000/update-event",
+      "description": "Remove a VIP guest from seating (last-minute cancellation)",
+      "body": {
+        "event_id": "EVT-2024-001",
+        "current_running_order": null,
+        "current_seating": {
+          "event_id": "EVT-2024-001",
+          "generated_at": "2024-11-15T07:00:00",
+          "total_guests": 8,
+          "total_tables": 5,
+          "layout": [
+            {
+              "guest_id": "G001",
+              "guest_name": "Minister Raj Pillai",
+              "guest_title": "Minister of Trade & Industry",
+              "table_id": "T01",
+              "table_number": 1,
+              "seat_number": 1,
+              "zone": "head",
+              "vip_level": 5,
+              "notes": null
+            },
+            {
+              "guest_id": "G003",
+              "guest_name": "Ambassador Liu Wei",
+              "guest_title": "Ambassador",
+              "table_id": "T01",
+              "table_number": 1,
+              "seat_number": 2,
+              "zone": "head",
+              "vip_level": 5,
+              "notes": null
+            }
+          ],
+          "unassigned": [],
+          "warnings": []
+        },
+        "updates": [
+          {
+            "type": "vip_removal",
+            "target_id": "G003",
+            "delta_minutes": null,
+            "new_value": null,
+            "reason": "Ambassador Liu Wei has cancelled due to diplomatic emergency"
+          }
+        ]
+      }
+    }
+  }
+}
