@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Cadence Engine</title>
+  <link rel="stylesheet" href="styles.css"/>
+</head>
+<body>
+
+  <!-- TOP BAR -->
+  <header>
+    <div class="brand">
+      <div class="brand-glyph">C</div>
+      <div>
+        <div class="brand-name">Cadence Engine</div>
+        <div class="brand-sub">Event Management AI</div>
+      </div>
+    </div>
+    <nav>
+      <button class="nav-btn active" onclick="showTab('running-order')">Running Order</button>
+      <button class="nav-btn" onclick="showTab('seating')">Seating</button>
+      <button class="nav-btn" onclick="showTab('updates')">Live Updates</button>
+    </nav>
+    <div class="health-badge" id="health-badge">● Connecting...</div>
+    <button class="quit-btn" id="quit-btn" onclick="quitApp()" title="Quit desktop app">Quit</button>
+  </header>
+
+  <main>
+
+    <!-- ═══════════════════════════════════════════════════
+         TAB 1 — RUNNING ORDER
+    ════════════════════════════════════════════════════ -->
+    <section class="tab active" id="tab-running-order">
+      <div class="page-title">
+        <h1>Running Order Generator</h1>
+        <p>Fill in your event details and agenda items — Cadence Engine will produce an optimized timeline.</p>
+      </div>
+
+      <div class="two-col">
+        <!-- LEFT: FORM -->
+        <div class="form-panel">
+
+          <!-- Event Details -->
+          <div class="form-group">
+            <label>Event Name</label>
+            <input type="text" id="ro-event-name" placeholder="e.g. Asia Pacific Leadership Summit 2024"/>
+          </div>
+
+          <div class="row-2">
+            <div class="form-group">
+              <label>Event Date</label>
+              <input type="date" id="ro-event-date"/>
+            </div>
+            <div class="form-group">
+              <label>Venue</label>
+              <input type="text" id="ro-venue" placeholder="e.g. Marina Bay Sands"/>
+            </div>
+          </div>
+
+          <div class="row-2">
+            <div class="form-group">
+              <label>Start Time</label>
+              <input type="time" id="ro-start-time" value="08:30"/>
+            </div>
+            <div class="form-group">
+              <label>End Time</label>
+              <input type="time" id="ro-end-time" value="18:00"/>
+            </div>
+          </div>
+
+          <!-- Speakers -->
+          <div class="section-divider">
+            <span>Speakers / Sessions</span>
+            <button class="add-btn" onclick="addSpeaker()">+ Add Speaker</button>
+          </div>
+
+          <div id="speakers-list"></div>
+
+          <!-- Breaks -->
+          <div class="section-divider">
+            <span>Breaks</span>
+            <button class="add-btn" onclick="addBreak()">+ Add Break</button>
+          </div>
+
+          <div id="breaks-list"></div>
+
+          <button class="submit-btn" onclick="generateRunningOrder()">
+            <span class="btn-icon">▶</span> Generate Running Order
+          </button>
+        </div>
+
+        <!-- RIGHT: RESULT -->
+        <div class="result-panel">
+          <div class="result-header">
+            <span>Output</span>
+            <button class="copy-btn" onclick="copyResult('ro-result')" title="Copy JSON">⎘ Copy</button>
+          </div>
+          <div class="result-body" id="ro-result">
+            <div class="placeholder-msg">
+              <div class="placeholder-icon">📋</div>
+              <p>Your generated running order will appear here.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ═══════════════════════════════════════════════════
+         TAB 2 — SEATING
+    ════════════════════════════════════════════════════ -->
+    <section class="tab" id="tab-seating">
+      <div class="page-title">
+        <h1>Seating Arrangement</h1>
+        <p>Add your guest list and table configuration — Cadence Engine will place guests by VIP hierarchy.</p>
+      </div>
+
+      <div class="two-col">
+        <!-- LEFT: FORM -->
+        <div class="form-panel">
+
+          <div class="form-group">
+            <label>Event ID</label>
+            <input type="text" id="seat-event-id" placeholder="e.g. EVT-2024-001"/>
+          </div>
+
+          <!-- Tables -->
+          <div class="section-divider">
+            <span>Tables</span>
+            <button class="add-btn" onclick="addTable()">+ Add Table</button>
+          </div>
+          <div id="tables-list"></div>
+
+          <!-- Guests -->
+          <div class="section-divider">
+            <span>Guests</span>
+            <button class="add-btn" onclick="addGuest()">+ Add Guest</button>
+          </div>
+          <div id="guests-list"></div>
+
+          <!-- Head Table -->
+          <div class="form-group">
+            <label>Head Table Guest IDs <span class="hint">(comma-separated, e.g. G001,G002)</span></label>
+            <input type="text" id="head-table-ids" placeholder="G001, G002"/>
+          </div>
+
+          <button class="submit-btn" onclick="generateSeating()">
+            <span class="btn-icon">▶</span> Generate Seating
+          </button>
+        </div>
+
+        <!-- RIGHT: RESULT -->
+        <div class="result-panel">
+          <div class="result-header">
+            <span>Output</span>
+            <button class="copy-btn" onclick="copyResult('seat-result')" title="Copy JSON">⎘ Copy</button>
+          </div>
+          <div class="result-body" id="seat-result">
+            <div class="placeholder-msg">
+              <div class="placeholder-icon">🪑</div>
+              <p>Your seating layout will appear here.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ═══════════════════════════════════════════════════
+         TAB 3 — LIVE UPDATES
+    ════════════════════════════════════════════════════ -->
+    <section class="tab" id="tab-updates">
+      <div class="page-title">
+        <h1>Live Event Updates</h1>
+        <p>Apply real-time changes — delays, cancellations, VIP arrivals — to a running event.</p>
+      </div>
+
+      <div class="two-col">
+        <!-- LEFT: FORM -->
+        <div class="form-panel">
+
+          <div class="form-group">
+            <label>Event ID</label>
+            <input type="text" id="upd-event-id" placeholder="e.g. EVT-2024-001"/>
+          </div>
+
+          <!-- Updates -->
+          <div class="section-divider">
+            <span>Updates</span>
+            <button class="add-btn" onclick="addUpdate()">+ Add Update</button>
+          </div>
+          <div id="updates-list"></div>
+
+          <!-- Paste current running order -->
+          <div class="form-group" style="margin-top:16px">
+            <label>Current Running Order JSON <span class="hint">(paste from previous output, or leave blank)</span></label>
+            <textarea id="upd-running-order" rows="5" placeholder='{"event_id":"EVT-001","items":[...]}'></textarea>
+          </div>
+
+          <div class="form-group">
+            <label>Current Seating JSON <span class="hint">(paste from previous output, or leave blank)</span></label>
+            <textarea id="upd-seating" rows="5" placeholder='{"event_id":"EVT-001","layout":[...]}'></textarea>
+          </div>
+
+          <button class="submit-btn" onclick="applyUpdate()">
+            <span class="btn-icon">▶</span> Apply Updates
+          </button>
+        </div>
+
+        <!-- RIGHT: RESULT -->
+        <div class="result-panel">
+          <div class="result-header">
+            <span>Output</span>
+            <button class="copy-btn" onclick="copyResult('upd-result')" title="Copy JSON">⎘ Copy</button>
+          </div>
+          <div class="result-body" id="upd-result">
+            <div class="placeholder-msg">
+              <div class="placeholder-icon">⚡</div>
+              <p>Updated running order or seating will appear here.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- TOAST -->
+  <div id="toast"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>

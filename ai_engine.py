@@ -58,7 +58,7 @@ def call_gemini(
     Raises ValueError if all retries exhausted.
     """
     client = get_client()
-    model = os.getenv("GEMINI_MODEL", "gemini-2.5-flash-preview-04-17")
+    model = os.getenv("GEMINI_MODEL", "gemini-2.5-flash-lite")
 
     full_prompt = f"{CADENCE_SYSTEM_PROMPT}\n\n{prompt}"
 
