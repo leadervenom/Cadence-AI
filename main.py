@@ -58,10 +58,12 @@ app.add_middleware(
 
 from routes.running_order_routes import router as running_order_router
 from routes.seating_routes import router as seating_router
+from routes.protocol_routes import router as protocol_router
 from routes.update_routes import router as update_router
 
 app.include_router(running_order_router)
 app.include_router(seating_router)
+app.include_router(protocol_router)
 app.include_router(update_router)
 
 

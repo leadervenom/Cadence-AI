@@ -144,6 +144,31 @@ class UpdateRequest(BaseModel):
     updates: List[UpdateType]
 
 
+class RunningOrderEditRequest(BaseModel):
+    instruction: str = Field(min_length=3, max_length=1000)
+
+
+class SimpleGuestInput(BaseModel):
+    name: str = Field(min_length=1, max_length=120)
+    role: Literal[
+        "keynote_speaker",
+        "vip_guest",
+        "sponsor",
+        "official",
+        "delegate",
+        "staff",
+        "general",
+    ]
+    vip_level: Literal[0, 1, 2, 3, 4, 5]
+
+
+class SimpleSeatingRequest(BaseModel):
+    event_name: Optional[str] = "Cadence Event"
+    guests: List[SimpleGuestInput]
+    table_count: int = Field(default=8, ge=1, le=100)
+    table_capacity: int = Field(default=8, ge=1, le=20)
+
+
 # ─── Response Wrappers ────────────────────────────────────────────────────────
 
 class CadenceResponse(BaseModel):

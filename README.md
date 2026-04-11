@@ -43,16 +43,16 @@ pip install -r requirements.txt
 
 ## Environment
 
-Create a `.env` file in the project root:
+Copy `.env.example` to `.env` and fill in your real key:
 
-```env
-GEMINI_API_KEY=your_new_key_here
-GEMINI_MODEL=gemini-2.5-flash-lite
+```bash
+cp .env.example .env
 ```
 
 Notes:
 - `GEMINI_API_KEY` is required.
 - If `GEMINI_MODEL` is omitted, default is `gemini-2.5-flash-lite`.
+- Never commit `.env` or paste real keys in docs/commits.
 
 ## Run Modes
 
@@ -107,3 +107,21 @@ Response envelope:
 - Server runs but generation fails:
   - Check `.env` key/model.
   - Check terminal logs for Gemini validation/API errors.
+
+## Secret Leak Recovery (If a key was committed)
+
+1. Rotate/revoke the exposed Gemini key in Google AI Studio immediately.
+2. Make sure env files are not tracked:
+   ```bash
+   git rm --cached .env
+   git rm --cached .env.local
+   git rm --cached .env.production
+   ```
+   (If a file is not tracked, Git will show an error for that line; that is okay.)
+3. Rewrite git history to purge old secrets, then force-push:
+   ```bash
+   pip install git-filter-repo
+   git filter-repo --path .env --invert-paths --force
+   git push --force-with-lease origin main
+   ```
+4. If secrets were also committed in other files, purge by replacement text with `git filter-repo --replace-text`.

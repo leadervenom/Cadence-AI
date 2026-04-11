@@ -220,3 +220,67 @@ OUTPUT SCHEMA:
 UPDATE REQUEST:
 {json.dumps(update_data, indent=2)}
 """
+
+
+def build_protocol_running_order_prompt(protocol_text: str) -> str:
+    schema = """
+{
+  "event_id": "string",
+  "event_name": "string",
+  "generated_at": "ISO 8601 datetime string",
+  "total_duration_minutes": integer,
+  "items": [
+    {
+      "sequence": integer (1-based),
+      "item_id": "string (e.g. item_001)",
+      "title": "string",
+      "type": "session|break|keynote|panel|ceremony|networking|other",
+      "start_time": "HH:MM",
+      "end_time": "HH:MM",
+      "duration_minutes": integer,
+      "speaker_id": "string or null",
+      "speaker_name": "string or null",
+      "location": "string or null",
+      "notes": "string or null",
+      "status": "scheduled|delayed|cancelled|completed"
+    }
+  ],
+  "warnings": ["string"]
+}
+"""
+    return f"""TASK: You are Cadence Engine. Extract event structure and generate a structured running order in JSON.
+
+STRICT REQUIREMENTS:
+- Infer a realistic event_id if not present in protocol.
+- Keep sequence numbers contiguous starting at 1.
+- Ensure each item has valid HH:MM start_time/end_time and duration_minutes.
+- generated_at must be current UTC ISO datetime.
+- If protocol is incomplete, still build best-possible schedule and document assumptions in warnings.
+
+OUTPUT SCHEMA (exact):
+{schema}
+
+PROTOCOL DOCUMENT TEXT:
+{protocol_text}
+"""
+
+
+def build_running_order_edit_prompt(current_order: dict, instruction: str) -> str:
+    return f"""TASK: Modify an existing running order based on a user instruction.
+
+STRICT RULES:
+- Modify only necessary fields. Do not regenerate entire schedule.
+- Preserve unaffected items exactly as-is.
+- Keep item_id values unchanged.
+- Keep sequence values contiguous and unchanged unless instruction requires insertion/removal.
+- Recalculate timings only when required by the instruction.
+- Update warnings with a short note for what changed.
+
+Return the complete updated running order JSON with the same schema as RunningOrder.
+
+CURRENT RUNNING ORDER:
+{json.dumps(current_order, indent=2)}
+
+USER INSTRUCTION:
+{instruction}
+"""

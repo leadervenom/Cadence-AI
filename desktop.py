@@ -67,9 +67,15 @@ def main() -> None:
     _wait_for_server(base_url)
 
     bridge = DesktopBridge(server)
-    window = webview.create_window("Cadence Engine", base_url, width=1400, height=900)
+    window = webview.create_window(
+        "Cadence Engine",
+        base_url,
+        width=1400,
+        height=900,
+        js_api=bridge,
+    )
     try:
-        webview.start(js_api=bridge)
+        webview.start()
     finally:
         server.should_exit = True
         server_thread.join(timeout=5)
