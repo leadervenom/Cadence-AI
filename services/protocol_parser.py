@@ -4,11 +4,17 @@ Protocol parsing utilities for PDF, DOCX, and TXT uploads.
 
 from __future__ import annotations
 
+import re
 from io import BytesIO
 from pathlib import Path
 
 import pdfplumber
 from docx import Document
+from docx.document import Document as _DocxDocument
+from docx.oxml.table import CT_Tbl
+from docx.oxml.text.paragraph import CT_P
+from docx.table import Table
+from docx.text.paragraph import Paragraph
 
 
 SUPPORTED_PROTOCOL_EXTENSIONS = {".pdf", ".docx", ".txt"}
@@ -33,7 +39,7 @@ def _extract_pdf_text(content: bytes) -> str:
             page_text = page.extract_text() or ""
             if page_text.strip():
                 chunks.append(page_text.strip())
-    text = "\n\n".join(chunks).strip()
+    text = _normalize_protocol_text("\n\n".join(chunks))
     if not text:
         raise ValueError("No readable text found in PDF.")
     return text
@@ -41,15 +47,57 @@ def _extract_pdf_text(content: bytes) -> str:
 
 def _extract_docx_text(content: bytes) -> str:
     doc = Document(BytesIO(content))
-    chunks = [paragraph.text.strip() for paragraph in doc.paragraphs if paragraph.text.strip()]
-    text = "\n\n".join(chunks).strip()
+    chunks: list[str] = []
+
+    for block in _iter_docx_blocks(doc):
+        if isinstance(block, Paragraph):
+            text = block.text.strip()
+            if text and (not chunks or chunks[-1] != text):
+                chunks.append(text)
+            continue
+
+        if isinstance(block, Table):
+            for row in block.rows:
+                cells = [_extract_cell_text(cell) for cell in row.cells]
+                cells = [cell for cell in cells if cell]
+                if not cells:
+                    continue
+                line = " | ".join(cells)
+                if not chunks or chunks[-1] != line:
+                    chunks.append(line)
+
+    text = _normalize_protocol_text("\n\n".join(chunks))
     if not text:
         raise ValueError("No readable text found in DOCX.")
     return text
 
 
 def _extract_txt_text(content: bytes) -> str:
-    text = content.decode("utf-8", errors="replace").strip()
+    text = _normalize_protocol_text(content.decode("utf-8", errors="replace"))
     if not text:
         raise ValueError("Uploaded TXT file is empty.")
     return text
+
+
+def _iter_docx_blocks(doc: _DocxDocument):
+    for child in doc.element.body.iterchildren():
+        if isinstance(child, CT_P):
+            yield Paragraph(child, doc)
+        elif isinstance(child, CT_Tbl):
+            yield Table(child, doc)
+
+
+def _extract_cell_text(cell) -> str:
+    parts = [paragraph.text.strip() for paragraph in cell.paragraphs if paragraph.text.strip()]
+    return " ".join(parts).strip()
+
+
+def _normalize_protocol_text(text: str) -> str:
+    cleaned = text.replace("\u25cf", "-")
+    cleaned = cleaned.replace("\u2022", "-")
+    cleaned = cleaned.replace("\u2013", "-").replace("\u2014", "-")
+    cleaned = cleaned.replace("\r\n", "\n").replace("\r", "\n")
+    cleaned = re.sub(r"-\s*-\s*", "- ", cleaned)
+    cleaned = re.sub(r"[ \t]+", " ", cleaned)
+    cleaned = re.sub(r"\n{3,}", "\n\n", cleaned)
+    return cleaned.strip()

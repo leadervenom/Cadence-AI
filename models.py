@@ -5,7 +5,7 @@ All schemas for events, agenda, seating, and updates.
 
 from __future__ import annotations
 from typing import Optional, List, Literal
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ValidationInfo, field_validator
 from datetime import datetime
 
 
@@ -60,6 +60,78 @@ class AgendaItem(BaseModel):
     location: Optional[str] = None
     notes: Optional[str] = None
     status: Literal["scheduled", "delayed", "cancelled", "completed"] = "scheduled"
+
+    @field_validator("type", mode="before")
+    @classmethod
+    def normalize_type(cls, value):
+        if value is None:
+            return "other"
+
+        text = str(value).strip().lower().replace("-", "_").replace(" ", "_")
+        allowed = {"session", "break", "keynote", "panel", "ceremony", "networking", "other"}
+        alias_map = {
+            "performance": "ceremony",
+            "performances": "ceremony",
+            "entertainment": "ceremony",
+            "intermission": "break",
+            "networking_session": "networking",
+        }
+
+        if text in allowed:
+            return text
+        if text in alias_map:
+            return alias_map[text]
+        return "other"
+
+    @field_validator("duration_minutes", mode="before")
+    @classmethod
+    def normalize_duration_minutes(cls, value, info: ValidationInfo):
+        if isinstance(value, int):
+            return value
+
+        if isinstance(value, str):
+            stripped = value.strip()
+            if stripped.isdigit():
+                return int(stripped)
+
+        if value is None:
+            start_time = info.data.get("start_time")
+            end_time = info.data.get("end_time")
+            inferred = cls._infer_duration_minutes(start_time, end_time)
+            if inferred is not None:
+                return inferred
+
+        raise ValueError("duration_minutes must be an integer or inferable from start_time/end_time")
+
+    @staticmethod
+    def _infer_duration_minutes(start_time: Optional[str], end_time: Optional[str]) -> Optional[int]:
+        if not start_time or not end_time:
+            return None
+
+        start = AgendaItem._hhmm_to_minutes(start_time)
+        end = AgendaItem._hhmm_to_minutes(end_time)
+        if start is None or end is None:
+            return None
+
+        if end < start:
+            end += 24 * 60
+
+        return end - start
+
+    @staticmethod
+    def _hhmm_to_minutes(value: str) -> Optional[int]:
+        parts = value.split(":")
+        if len(parts) != 2:
+            return None
+        if not parts[0].isdigit() or not parts[1].isdigit():
+            return None
+
+        hour = int(parts[0])
+        minute = int(parts[1])
+        if hour < 0 or hour > 23 or minute < 0 or minute > 59:
+            return None
+
+        return hour * 60 + minute
 
 
 class RunningOrder(BaseModel):

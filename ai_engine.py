@@ -142,6 +142,9 @@ RULES:
 - Stay within event start_time and end_time boundaries.
 - Add a warnings array for any constraint conflicts or assumptions made.
 - generated_at must be today's UTC datetime in ISO 8601 format.
+- Use ONLY these `type` values: session, break, keynote, panel, ceremony, networking, other.
+- If protocol text says "performance", map it to `ceremony`.
+- `duration_minutes` must always be an integer (never null).
 
 OUTPUT SCHEMA (return exactly this structure):
 {schema}
@@ -256,6 +259,9 @@ STRICT REQUIREMENTS:
 - Ensure each item has valid HH:MM start_time/end_time and duration_minutes.
 - generated_at must be current UTC ISO datetime.
 - If protocol is incomplete, still build best-possible schedule and document assumptions in warnings.
+- Use ONLY these `type` values: session, break, keynote, panel, ceremony, networking, other.
+- If protocol text says "performance", map it to `ceremony`.
+- `duration_minutes` must always be an integer (never null).
 
 OUTPUT SCHEMA (exact):
 {schema}
@@ -275,6 +281,9 @@ STRICT RULES:
 - Keep sequence values contiguous and unchanged unless instruction requires insertion/removal.
 - Recalculate timings only when required by the instruction.
 - Update warnings with a short note for what changed.
+- Keep every `type` value within: session, break, keynote, panel, ceremony, networking, other.
+- If a type becomes ambiguous (for example "performance"), normalize it to `ceremony`.
+- Ensure every item has integer `duration_minutes` (never null).
 
 Return the complete updated running order JSON with the same schema as RunningOrder.
 
