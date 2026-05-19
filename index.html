@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Cadence Engine</title>
+  <link rel="stylesheet" href="styles.css"/>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <div class="brand-glyph">C</div>
+      <div>
+        <div class="brand-name">Cadence Engine</div>
+        <div class="brand-sub">AI-First Event Workflow</div>
+      </div>
+    </div>
+    <div class="health-badge" id="health-badge">● Connecting...</div>
+    <button class="quit-btn" id="quit-btn" onclick="quitApp()" title="Quit desktop app">Quit</button>
+  </header>
+
+  <main>
+    <section class="workspace">
+      <div class="left-column">
+        <div class="card">
+          <h2>Upload Protocol Document</h2>
+          <p class="muted">Upload PDF, DOCX, or TXT. Cadence will generate the running order automatically.</p>
+          <div class="upload-row">
+            <input id="protocol-file" type="file" accept=".pdf,.docx,.txt"/>
+            <button id="generate-btn" class="primary-btn" onclick="generateFromDocument()">Generate From Document</button>
+          </div>
+          <div id="upload-status" class="muted small">No document uploaded yet.</div>
+        </div>
+
+        <div class="card">
+          <h2>Edit Instructions</h2>
+          <p class="muted">Use plain language. Example: "Delay opening speech by 15 minutes".</p>
+          <div class="edit-row">
+            <input id="edit-instruction" type="text" placeholder="Describe the change you want"/>
+            <button class="primary-btn" onclick="applyInstructionEdit()">Edit</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Seating (Simple Input)</h2>
+          <p class="muted">Add names, role, and VIP level. Cadence handles seat assignment.</p>
+          <div class="row-2">
+            <div>
+              <label>Event Name</label>
+              <input id="seat-event-name" type="text" placeholder="Cadence Gala"/>
+            </div>
+            <div>
+              <label>Table Count</label>
+              <input id="seat-table-count" type="number" min="1" max="100" value="8"/>
+            </div>
+          </div>
+          <div class="row-2">
+            <div>
+              <label>Seats Per Table</label>
+              <input id="seat-table-capacity" type="number" min="1" max="20" value="8"/>
+            </div>
+            <div class="align-end">
+              <button class="secondary-btn" onclick="addSeatingGuest()">+ Add Guest</button>
+            </div>
+          </div>
+          <div id="seating-guests" class="stack"></div>
+          <button class="primary-btn" onclick="generateSimpleSeating()">Generate Seating</button>
+          <div id="seating-result" class="panel-placeholder">Seating assignments will appear here.</div>
+        </div>
+      </div>
+
+      <div class="right-column">
+        <div class="card running-order-card">
+          <div class="card-head">
+            <h2>Running Order</h2>
+            <span class="muted small">Click Time/Title/Department/Location/Notes to edit inline</span>
+          </div>
+          <div id="running-order-view" class="panel-placeholder">Upload a protocol document to generate your running order.</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="toast"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
