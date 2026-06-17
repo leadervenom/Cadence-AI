@@ -42,458 +42,122 @@ Cadence/
 ---
 
 # Module to Frontend Mapping
-
-<table style="border-collapse: collapse; width:100%;">
-
-<tr>
-
-<th style="border:1px solid black; padding:8px;">
-Sprint
-</th>
-
-<th style="border:1px solid black; padding:8px;">
-Module
-</th>
-
-<th style="border:1px solid black; padding:8px;">
-Frontend
-</th>
-
-<th style="border:1px solid black; padding:8px;">
-Backend
-</th>
-
-<th style="border:1px solid black; padding:8px;">
-Database
-</th>
-
-</tr>
-
-
-<tr>
-
-<td style="border:1px solid black; padding:8px;">
-1
-</td>
-
-<td style="border:1px solid black; padding:8px;">
-User Authentication
-</td>
-
-<td style="border:1px solid black; padding:8px;">
-
-<ul>
-
-<li>
-
-<a href="frontend/index.html">
-
-Login Page
-
-</a>
-
-</li>
-
-</ul>
-
-</td>
-
-<td style="border:1px solid black; padding:8px;">
-
-<ul>
-
-<li>
-
-<a href="src/controllers/AuthController.js">
-
-AuthController.js
-
-</a>
-
-</li>
-
-<li>
-
-<a href="src/routes/authRoutes.js">
-
-authRoutes.js
-
-</a>
-
-</li>
-
-</ul>
-
-</td>
-
-<td style="border:1px solid black; padding:8px;">
-
-User Table
-
-</td>
-
-</tr>
-
-
-
-<tr>
-
-<td style="border:1px solid black; padding:8px;">
-1
-</td>
-
-<td style="border:1px solid black; padding:8px;">
-Event Management
-</td>
-
-<td style="border:1px solid black; padding:8px;">
-
-<ul>
-
-<li>
-
-<a href="frontend/index.html">
-
-Events Module
-
-</a>
-
-</li>
-
-</ul>
-
-</td>
-
-<td style="border:1px solid black; padding:8px;">
-
-<ul>
-
-<li>
-
-<a href="src/controllers/EventController.js">
-
-EventController.js
-
-</a>
-
-</li>
-
-<li>
-
-<a href="src/routes/eventRoutes.js">
-
-eventRoutes.js
-
-</a>
-
-</li>
-
-<li>
-
-<a href="src/repositories/EventRepository.js">
-
-EventRepository.js
-
-</a>
-
-</li>
-
-</ul>
-
-</td>
-
-<td style="border:1px solid black; padding:8px;">
-
-events
-
-</td>
-
-</tr>
-
-
-
-<tr>
-
-<td style="border:1px solid black; padding:8px;">
-2
-</td>
-
-<td style="border:1px solid black; padding:8px;">
-VIP Management
-</td>
-
-<td style="border:1px solid black; padding:8px;">
-
-<ul>
-
-<li>
-
-<a href="frontend/index.html">
-
-VIP Module
-
-</a>
-
-</li>
-
-</ul>
-
-</td>
-
-<td style="border:1px solid black; padding:8px;">
-
-<ul>
-
-<li>
-
-<a href="src/controllers/VIPController.js">
-
-VIPController.js
-
-</a>
-
-</li>
-
-<li>
-
-<a href="src/routes/vipRoutes.js">
-
-vipRoutes.js
-
-</a>
-
-</li>
-
-<li>
-
-<a href="src/repositories/VIPProfileRepository.js">
-
-VIPProfileRepository.js
-
-</a>
-
-</li>
-
-</ul>
-
-</td>
-
-<td style="border:1px solid black; padding:8px;">
-
-vip_profiles
-
-</td>
-
-</tr>
-
-
-
-<tr>
-
-<td style="border:1px solid black; padding:8px;">
-2
-</td>
-
-<td style="border:1px solid black; padding:8px;">
-Seating Arrangement
-</td>
-
-<td style="border:1px solid black; padding:8px;">
-
-<ul>
-
-<li>
-
-<a href="frontend/index.html">
-
-Seating Layout
-
-</a>
-
-</li>
-
-</ul>
-
-</td>
-
-<td style="border:1px solid black; padding:8px;">
-
-<ul>
-
-<li>
-
-<a href="src/controllers/SeatingController.js">
-
-SeatingController.js
-
-</a>
-
-</li>
-
-<li>
-
-<a href="src/routes/seatingRoutes.js">
-
-seatingRoutes.js
-
-</a>
-
-</li>
-
-<li>
-
-<a href="src/repositories/SeatingRepository.js">
-
-SeatingRepository.js
-
-</a>
-
-</li>
-
-</ul>
-
-</td>
-
-<td style="border:1px solid black; padding:8px;">
-
-seating_tables
-
-</td>
-
-</tr>
-
-
-
-<tr>
-
-<td style="border:1px solid black; padding:8px;">
-3
-</td>
-
-<td style="border:1px solid black; padding:8px;">
-Running Order
-</td>
-
-<td style="border:1px solid black; padding:8px;">
-
-<ul>
-
-<li>
-
-<a href="frontend/index.html">
-
-Running Order Module
-
-</a>
-
-</li>
-
-</ul>
-
-</td>
-
-<td style="border:1px solid black; padding:8px;">
-
-<ul>
-
-<li>
-
-<a href="src/controllers/EventController.js">
-
-EventController.js
-
-</a>
-
-</li>
-
-</ul>
-
-</td>
-
-<td style="border:1px solid black; padding:8px;">
-
-running_orders
-
-</td>
-
-</tr>
-
-
-
-<tr>
-
-<td style="border:1px solid black; padding:8px;">
-3
-</td>
-
-<td style="border:1px solid black; padding:8px;">
-AI Event Extraction
-</td>
-
-<td style="border:1px solid black; padding:8px;">
-
-<ul>
-
-<li>
-
-<a href="frontend/index.html">
-
-AI Workspace
-
-</a>
-
-</li>
-
-</ul>
-
-</td>
-
-<td style="border:1px solid black; padding:8px;">
-
-<ul>
-
-<li>
-
-<a href="src/controllers/AIController.js">
-
-AIController.js
-
-</a>
-
-</li>
-
-<li>
-
-<a href="src/routes/aiRoutes.js">
-
-aiRoutes.js
-
-</a>
-
-</li>
-
-<li>
-
-<a href="src/repositories/EventExtractionRepository.js">
-
-EventExtractionRepository.js
-
-</a>
-
-</li>
-
-</ul>
-
-</td>
-
-<td style="border:1px solid black; padding:8px;">
-
-event_extractions
-
-</td>
-
-</tr>
-
+<table style="border-collapse: collapse; width: 100%; font-family: sans-serif;">
+  <thead>
+    <tr style="background-color: #f2f2f2;">
+      <th style="border: 1px solid #dddddd; padding: 12px; text-align: left;">Sprint</th>
+      <th style="border: 1px solid #dddddd; padding: 12px; text-align: left;">Module</th>
+      <th style="border: 1px solid #dddddd; padding: 12px; text-align: left;">Frontend</th>
+      <th style="border: 1px solid #dddddd; padding: 12px; text-align: left;">Backend</th>
+      <th style="border: 1px solid #dddddd; padding: 12px; text-align: left;">Database</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="border: 1px solid #dddddd; padding: 12px; vertical-align: top;">1</td>
+      <td style="border: 1px solid #dddddd; padding: 12px; vertical-align: top; font-weight: bold;">User Authentication</td>
+      <td style="border: 1px solid #dddddd; padding: 12px; vertical-align: top;">
+        <ul style="margin: 0; padding-left: 20px;">
+          <li><a href="frontend/index.html">Login Page</a></li>
+        </ul>
+      </td>
+      <td style="border: 1px solid #dddddd; padding: 12px; vertical-align: top;">
+        <ul style="margin: 0; padding-left: 20px;">
+          <li><a href="src/controllers/AuthController.js">AuthController.js</a></li>
+          <li><a href="src/routes/authRoutes.js">authRoutes.js</a></li>
+        </ul>
+      </td>
+      <td style="border: 1px solid #dddddd; padding: 12px; vertical-align: top; font-family: monospace;">user_table</td>
+    </tr>
+
+  <tr>
+    <td style="border: 1px solid #dddddd; padding: 12px; vertical-align: top;">1</td>
+    <td style="border: 1px solid #dddddd; padding: 12px; vertical-align: top; font-weight: bold;">Event Management</td>
+    <td style="border: 1px solid #dddddd; padding: 12px; vertical-align: top;">
+      <ul style="margin: 0; padding-left: 20px;">
+        <li><a href="frontend/index.html">Events Module</a></li>
+      </ul>
+    </td>
+    <td style="border: 1px solid #dddddd; padding: 12px; vertical-align: top;">
+      <ul style="margin: 0; padding-left: 20px;">
+        <li><a href="src/controllers/EventController.js">EventController.js</a></li>
+        <li><a href="src/routes/eventRoutes.js">eventRoutes.js</a></li>
+        <li><a href="src/repositories/EventRepository.js">EventRepository.js</a></li>
+      </ul>
+    </td>
+    <td style="border: 1px solid #dddddd; padding: 12px; vertical-align: top; font-family: monospace;">events</td>
+  </tr>
+
+  <tr>
+    <td style="border: 1px solid #dddddd; padding: 12px; vertical-align: top;">2</td>
+    <td style="border: 1px solid #dddddd; padding: 12px; vertical-align: top; font-weight: bold;">VIP Management</td>
+    <td style="border: 1px solid #dddddd; padding: 12px; vertical-align: top;">
+      <ul style="margin: 0; padding-left: 20px;">
+        <li><a href="frontend/index.html">VIP Module</a></li>
+      </ul>
+    </td>
+    <td style="border: 1px solid #dddddd; padding: 12px; vertical-align: top;">
+      <ul style="margin: 0; padding-left: 20px;">
+        <li><a href="src/controllers/VIPController.js">VIPController.js</a></li>
+        <li><a href="src/routes/vipRoutes.js">vipRoutes.js</a></li>
+        <li><a href="src/repositories/VIPProfileRepository.js">VIPProfileRepository.js</a></li>
+      </ul>
+    </td>
+    <td style="border: 1px solid #dddddd; padding: 12px; vertical-align: top; font-family: monospace;">vip_profiles</td>
+  </tr>
+
+  <tr>
+    <td style="border: 1px solid #dddddd; padding: 12px; vertical-align: top;">2</td>
+    <td style="border: 1px solid #dddddd; padding: 12px; vertical-align: top; font-weight: bold;">Seating Arrangement</td>
+    <td style="border: 1px solid #dddddd; padding: 12px; vertical-align: top;">
+      <ul style="margin: 0; padding-left: 20px;">
+        <li><a href="frontend/index.html">Seating Layout</a></li>
+      </ul>
+    </td>
+    <td style="border: 1px solid #dddddd; padding: 12px; vertical-align: top;">
+      <ul style="margin: 0; padding-left: 20px;">
+        <li><a href="src/controllers/SeatingController.js">SeatingController.js</a></li>
+        <li><a href="src/routes/seatingRoutes.js">seatingRoutes.js</a></li>
+        <li><a href="src/repositories/SeatingRepository.js">SeatingRepository.js</a></li>
+      </ul>
+    </td>
+    <td style="border: 1px solid #dddddd; padding: 12px; vertical-align: top; font-family: monospace;">seating_tables</td>
+  </tr>
+
+  <tr>
+    <td style="border: 1px solid #dddddd; padding: 12px; vertical-align: top;">3</td>
+    <td style="border: 1px solid #dddddd; padding: 12px; vertical-align: top; font-weight: bold;">Running Order</td>
+    <td style="border: 1px solid #dddddd; padding: 12px; vertical-align: top;">
+      <ul style="margin: 0; padding-left: 20px;">
+        <li><a href="frontend/index.html">Running Order Module</a></li>
+      </ul>
+    </td>
+    <td style="border: 1px solid #dddddd; padding: 12px; vertical-align: top;">
+      <ul style="margin: 0; padding-left: 20px;">
+        <li><a href="src/controllers/EventController.js">EventController.js</a></li>
+      </ul>
+    </td>
+    <td style="border: 1px solid #dddddd; padding: 12px; vertical-align: top; font-family: monospace;">running_orders</td>
+  </tr>
+
+  <tr>
+    <td style="border: 1px solid #dddddd; padding: 12px; vertical-align: top;">3</td>
+    <td style="border: 1px solid #dddddd; padding: 12px; vertical-align: top; font-weight: bold;">AI Event Extraction</td>
+    <td style="border: 1px solid #dddddd; padding: 12px; vertical-align: top;">
+      <ul style="margin: 0; padding-left: 20px;">
+        <li><a href="frontend/index.html">AI Workspace</a></li>
+      </ul>
+    </td>
+    <td style="border: 1px solid #dddddd; padding: 12px; vertical-align: top;">
+      <ul style="margin: 0; padding-left: 20px;">
+        <li><a href="src/controllers/AIController.js">AIController.js</a></li>
+        <li><a href="src/routes/aiRoutes.js">aiRoutes.js</a></li>
+        <li><a href="src/repositories/EventExtractionRepository.js">EventExtractionRepository.js</a></li>
+      </ul>
+    </td>
+    <td style="border: 1px solid #dddddd; padding: 12px; vertical-align: top; font-family: monospace;">event_extractions</td>
+  </tr>
+  </tbody>
 </table>
 
 ---
