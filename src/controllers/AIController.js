@@ -1,51 +1,17 @@
-import pool from "../database/db.js";
+class AIController {
 
-class EventExtractionRepository {
+    getStatus(req,res){
 
-    async getExtractionsByEvent(eventId) {
+        res.json({
 
-        const query = `
-            SELECT
-                *
-            FROM event_extractions
-            WHERE event_id = $1
-            ORDER BY extraction_id;
-        `;
+            module:"AI Engine",
 
-        const result = await pool.query(
+            status:"ACTIVE"
 
-            query,
-
-            [eventId]
-
-        );
-
-        return result.rows;
-
-    }
-
-
-    async getExtractionById(extractionId) {
-
-        const query = `
-            SELECT
-                *
-            FROM event_extractions
-            WHERE extraction_id = $1;
-        `;
-
-        const result = await pool.query(
-
-            query,
-
-            [extractionId]
-
-        );
-
-        return result.rows[0];
+        });
 
     }
 
 }
 
-export default EventExtractionRepository;
+export default AIController;

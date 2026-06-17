@@ -1,33 +1,17 @@
 import express from "express";
 
+import ProtocolController from "../controllers/ProtocolController.js";
+
 const router = express.Router();
+
+const controller = new ProtocolController();
 
 
 router.get(
 
     "/",
 
-    (
-
-        req,
-
-        res
-
-    ) => {
-
-        res.json({
-
-            module:
-
-            "Protocol Hierarchy",
-
-            status:
-
-            "ACTIVE"
-
-        });
-
-    }
+    controller.getStatus
 
 );
 

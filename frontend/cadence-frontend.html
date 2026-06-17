@@ -1,0 +1,1467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cadence Operations</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg-deep: #090e1a;
+    --bg-card: #0d1424;
+    --bg-panel: #111827;
+    --bg-hover: #1a2236;
+    --bg-input: #0a0f1e;
+    --border: rgba(255,255,255,0.08);
+    --border-accent: rgba(59,130,246,0.35);
+    --text-primary: #e8eaf0;
+    --text-secondary: #7b8599;
+    --text-muted: #4a5366;
+    --accent-blue: #3b82f6;
+    --accent-blue-dim: rgba(59,130,246,0.15);
+    --accent-green: #10b981;
+    --accent-green-dim: rgba(16,185,129,0.12);
+    --accent-amber: #f59e0b;
+    --accent-amber-dim: rgba(245,158,11,0.12);
+    --accent-red: #ef4444;
+    --accent-red-dim: rgba(239,68,68,0.12);
+    --accent-purple: #8b5cf6;
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 14px;
+    --font: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
+  }
+
+  body {
+    background: var(--bg-deep);
+    color: var(--text-primary);
+    font-family: var(--font);
+    font-size: 14px;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── AUTH SCREEN ── */
+  #auth-screen {
+    position: fixed; inset: 0;
+    background: var(--bg-deep);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    z-index: 100;
+  }
+  .auth-logo {
+    width: 56px; height: 56px;
+    background: linear-gradient(135deg, #1d4ed8, #3b82f6);
+    border-radius: 16px;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 20px;
+    box-shadow: 0 0 0 1px rgba(59,130,246,0.3);
+  }
+  .auth-logo i { font-size: 28px; color: #fff; }
+  .auth-title { font-size: 22px; font-weight: 600; letter-spacing: -0.3px; margin-bottom: 4px; }
+  .auth-sub { font-size: 13px; color: var(--text-secondary); margin-bottom: 32px; }
+  .auth-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 28px;
+    width: 360px;
+  }
+  .auth-card label { display: block; font-size: 12px; font-weight: 500; color: var(--text-secondary); margin-bottom: 6px; letter-spacing: 0.3px; }
+  .auth-card .field { margin-bottom: 18px; }
+  .input-wrap { position: relative; }
+  .auth-card input, .auth-card select {
+    width: 100%;
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 10px 14px;
+    color: var(--text-primary);
+    font-size: 14px;
+    font-family: var(--font);
+    outline: none;
+    transition: border-color 0.15s;
+    appearance: none;
+  }
+  .auth-card input:focus, .auth-card select:focus { border-color: var(--accent-blue); }
+  .auth-card select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237b8599' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 36px; }
+  .eye-btn { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 4px; }
+  .btn-primary {
+    width: 100%;
+    background: var(--accent-blue);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 11px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: opacity 0.15s, transform 0.1s;
+    margin-top: 6px;
+    font-family: var(--font);
+  }
+  .btn-primary:hover { opacity: 0.9; }
+  .btn-primary:active { transform: scale(0.98); }
+  .auth-footer { text-align: center; margin-top: 20px; font-size: 11px; color: var(--text-muted); letter-spacing: 1px; }
+
+  /* ── TOPBAR ── */
+  #topbar {
+    height: 52px;
+    background: var(--bg-card);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center;
+    padding: 0 20px;
+    gap: 12px;
+    flex-shrink: 0;
+  }
+  .topbar-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+  .topbar-icon {
+    width: 28px; height: 28px;
+    background: linear-gradient(135deg, #1d4ed8, #3b82f6);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .topbar-icon i { font-size: 14px; color: #fff; }
+  .topbar-name { font-weight: 600; font-size: 15px; }
+  .topbar-sep { color: var(--border); font-size: 18px; }
+  .topbar-ctx { font-size: 13px; color: var(--text-secondary); }
+  .topbar-right { margin-left: auto; display: flex; align-items: center; gap: 12px; }
+  .conn-badge {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 12px; color: var(--accent-green);
+    background: var(--accent-green-dim);
+    padding: 4px 10px; border-radius: 20px;
+    border: 1px solid rgba(16,185,129,0.2);
+  }
+  .conn-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent-green); animation: pulse-dot 2s infinite; }
+  @keyframes pulse-dot { 0%,100%{opacity:1} 50%{opacity:0.4} }
+  .topbar-role { font-size: 12px; color: var(--text-secondary); }
+  .btn-icon {
+    background: none; border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 6px 10px;
+    color: var(--text-secondary); cursor: pointer;
+    display: flex; align-items: center; gap: 6px;
+    font-size: 13px; font-family: var(--font);
+    transition: background 0.15s, color 0.15s;
+  }
+  .btn-icon:hover { background: var(--bg-hover); color: var(--text-primary); }
+  .back-btn { display: flex; align-items: center; gap: 6px; background: none; border: none; color: var(--text-secondary); cursor: pointer; font-size: 13px; font-family: var(--font); padding: 6px 10px; border-radius: var(--radius-sm); transition: background 0.15s, color 0.15s; }
+  .back-btn:hover { background: var(--bg-hover); color: var(--text-primary); }
+
+  /* ── MAIN LAYOUT ── */
+  #app { display: none; flex-direction: column; height: 100vh; }
+  #app.active { display: flex; }
+
+  #main { flex: 1; overflow: hidden; display: flex; }
+
+  /* ── EVENTS LIST VIEW ── */
+  #events-view {
+    flex: 1;
+    padding: 40px;
+    overflow-y: auto;
+    display: none;
+  }
+  #events-view.active { display: block; }
+  .events-header { margin-bottom: 32px; }
+  .events-header h1 { font-size: 26px; font-weight: 600; margin-bottom: 4px; }
+  .events-header p { color: var(--text-secondary); font-size: 14px; }
+  .events-top-bar { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
+  .events-top-bar input {
+    flex: 1; max-width: 320px;
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 9px 14px 9px 36px;
+    color: var(--text-primary); font-size: 13px; font-family: var(--font); outline: none;
+  }
+  .events-top-bar input:focus { border-color: var(--accent-blue); }
+  .search-wrap { position: relative; }
+  .search-wrap i { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 16px; }
+  .btn-new {
+    display: flex; align-items: center; gap: 6px;
+    background: var(--accent-blue); color: #fff;
+    border: none; border-radius: var(--radius-sm);
+    padding: 9px 16px; font-size: 13px; font-weight: 500;
+    cursor: pointer; font-family: var(--font); transition: opacity 0.15s;
+    margin-left: auto;
+  }
+  .btn-new:hover { opacity: 0.88; }
+  .events-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 16px; }
+  .event-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+    position: relative;
+    overflow: hidden;
+  }
+  .event-card:hover { border-color: var(--border-accent); background: var(--bg-hover); }
+  .event-card-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 14px; }
+  .status-badge {
+    font-size: 11px; font-weight: 500; padding: 3px 9px; border-radius: 20px;
+    display: flex; align-items: center; gap: 5px; letter-spacing: 0.2px;
+  }
+  .status-badge.live { background: var(--accent-green-dim); color: var(--accent-green); border: 1px solid rgba(16,185,129,0.2); }
+  .status-badge.draft { background: var(--accent-amber-dim); color: var(--accent-amber); border: 1px solid rgba(245,158,11,0.2); }
+  .status-badge.completed { background: rgba(139,92,246,0.12); color: var(--accent-purple); border: 1px solid rgba(139,92,246,0.2); }
+  .status-badge.archived { background: rgba(107,114,128,0.12); color: #6b7280; border: 1px solid rgba(107,114,128,0.2); }
+  .status-dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+  .live .status-dot { animation: pulse-dot 2s infinite; }
+  .card-arrow { color: var(--text-muted); font-size: 18px; }
+  .event-card h3 { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
+  .event-card .event-desc { font-size: 12px; color: var(--text-secondary); margin-bottom: 14px; }
+  .event-meta { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-muted); }
+  .event-meta span { display: flex; align-items: center; gap: 4px; }
+  .meta-dot { color: var(--border); }
+
+  /* ── EVENT WORKSPACE VIEW ── */
+  #workspace-view {
+    flex: 1;
+    display: none;
+    overflow: hidden;
+  }
+  #workspace-view.active { display: flex; }
+
+  /* ── LEFT PANEL: SOURCES ── */
+  #left-panel {
+    width: 240px;
+    flex-shrink: 0;
+    background: var(--bg-card);
+    border-right: 1px solid var(--border);
+    display: flex; flex-direction: column;
+    overflow: hidden;
+  }
+  .panel-header {
+    padding: 16px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .panel-label { font-size: 10px; font-weight: 600; letter-spacing: 1px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 2px; }
+  .panel-count { font-size: 12px; color: var(--text-secondary); }
+  .drop-zone {
+    margin: 12px;
+    border: 1px dashed var(--border);
+    border-radius: var(--radius-md);
+    padding: 18px 12px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .drop-zone:hover { border-color: var(--accent-blue); background: var(--accent-blue-dim); }
+  .drop-zone i { font-size: 22px; color: var(--text-muted); display: block; margin-bottom: 6px; }
+  .drop-zone p { font-size: 12px; color: var(--text-secondary); }
+  .drop-zone p span { color: var(--accent-blue); cursor: pointer; }
+  .drop-zone .file-types { font-size: 10px; color: var(--text-muted); margin-top: 4px; }
+  .sources-list { flex: 1; overflow-y: auto; padding: 4px 12px 12px; }
+  .source-item {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 10px;
+    border-radius: var(--radius-sm);
+    margin-bottom: 4px;
+    cursor: pointer;
+    transition: background 0.12s;
+    border: 1px solid transparent;
+  }
+  .source-item:hover { background: var(--bg-hover); }
+  .source-item.active { background: var(--accent-blue-dim); border-color: var(--border-accent); }
+  .source-icon { color: var(--text-muted); font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+  .source-info { min-width: 0; flex: 1; }
+  .source-name { font-size: 12px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-primary); }
+  .source-badge {
+    display: inline-flex; align-items: center;
+    font-size: 10px; padding: 1px 6px; border-radius: 10px; margin-top: 3px; font-weight: 500;
+  }
+  .source-badge.parsed { background: var(--accent-green-dim); color: var(--accent-green); }
+  .source-badge.processing { background: var(--accent-amber-dim); color: var(--accent-amber); }
+  .source-badge.failed { background: var(--accent-red-dim); color: var(--accent-red); }
+  .source-size { font-size: 10px; color: var(--text-muted); margin-left: auto; flex-shrink: 0; }
+
+  /* ── CENTER PANEL: MAIN WORKSPACE ── */
+  #center-panel {
+    flex: 1;
+    display: flex; flex-direction: column;
+    overflow: hidden;
+    background: var(--bg-deep);
+  }
+  .workspace-header {
+    padding: 20px 24px 0;
+    flex-shrink: 0;
+  }
+  .workspace-title { font-size: 17px; font-weight: 600; margin-bottom: 2px; }
+  .workspace-sub { font-size: 12px; color: var(--text-secondary); margin-bottom: 16px; }
+  .module-tabs {
+    display: flex; gap: 2px;
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    flex-shrink: 0;
+  }
+  .module-tab {
+    padding: 10px 16px;
+    font-size: 13px; font-weight: 500;
+    color: var(--text-secondary);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: color 0.12s, border-color 0.12s;
+    white-space: nowrap;
+    background: none; border-top: none; border-left: none; border-right: none;
+    font-family: var(--font);
+    display: flex; align-items: center; gap: 7px;
+  }
+  .module-tab:hover { color: var(--text-primary); }
+  .module-tab.active { color: var(--accent-blue); border-bottom-color: var(--accent-blue); }
+  .module-tab i { font-size: 16px; }
+  .module-content { flex: 1; overflow-y: auto; padding: 20px 24px; display: none; }
+  .module-content.active { display: block; }
+
+  /* Running Order Table */
+  .ro-table { width: 100%; border-collapse: collapse; }
+  .ro-table th {
+    text-align: left; font-size: 11px; font-weight: 600; letter-spacing: 0.5px;
+    color: var(--text-muted); text-transform: uppercase; padding: 8px 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .ro-table td { padding: 14px 12px; border-bottom: 1px solid rgba(255,255,255,0.04); vertical-align: top; }
+  .ro-table tr:hover td { background: var(--bg-hover); }
+  .ro-table tr.row-on-air td { background: rgba(59,130,246,0.06); }
+  .time-col { font-size: 13px; font-weight: 500; white-space: nowrap; color: var(--text-primary); }
+  .dur-col { font-size: 12px; color: var(--text-muted); white-space: nowrap; }
+  .activity-name { font-size: 14px; font-weight: 500; color: var(--text-primary); }
+  .activity-loc { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+  .role-col { font-size: 12px; color: var(--text-secondary); }
+  .row-status {
+    font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 20px; white-space: nowrap;
+  }
+  .row-status.passed { background: rgba(107,114,128,0.15); color: #6b7280; }
+  .row-status.on-air { background: var(--accent-blue-dim); color: var(--accent-blue); border: 1px solid rgba(59,130,246,0.3); }
+  .row-status.next { background: var(--accent-amber-dim); color: var(--accent-amber); }
+  .row-status.pending { background: rgba(107,114,128,0.08); color: var(--text-muted); }
+
+  /* Emergency Override */
+  .emergency-bar {
+    margin: 20px 24px 0;
+    background: rgba(239,68,68,0.06);
+    border: 1px solid rgba(239,68,68,0.2);
+    border-radius: var(--radius-md);
+    padding: 14px;
+    display: flex; align-items: center; gap: 12px;
+    flex-shrink: 0;
+  }
+  .emergency-icon { color: var(--accent-red); font-size: 18px; flex-shrink: 0; }
+  .emergency-label { font-size: 12px; font-weight: 600; color: var(--accent-red); margin-bottom: 3px; }
+  .emergency-input {
+    flex: 1; background: transparent; border: none; outline: none;
+    color: var(--text-primary); font-size: 13px; font-family: var(--font);
+  }
+  .emergency-input::placeholder { color: var(--text-muted); }
+  .btn-broadcast {
+    background: var(--accent-red); color: #fff; border: none;
+    border-radius: var(--radius-sm); padding: 8px 16px;
+    font-size: 13px; font-weight: 500; cursor: pointer; font-family: var(--font);
+    transition: opacity 0.15s; flex-shrink: 0;
+  }
+  .btn-broadcast:hover { opacity: 0.88; }
+
+  /* VIP List styles */
+  .vip-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+  .vip-card {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: var(--radius-md); padding: 14px;
+    display: flex; gap: 12px; align-items: flex-start;
+  }
+  .vip-avatar {
+    width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 600;
+  }
+  .vip-avatar.royalty { background: rgba(245,158,11,0.15); color: var(--accent-amber); }
+  .vip-avatar.vvip { background: rgba(239,68,68,0.12); color: var(--accent-red); }
+  .vip-avatar.vip { background: var(--accent-blue-dim); color: var(--accent-blue); }
+  .vip-avatar.official { background: var(--accent-green-dim); color: var(--accent-green); }
+  .vip-info { flex: 1; min-width: 0; }
+  .vip-rank { font-size: 10px; color: var(--text-muted); margin-bottom: 2px; }
+  .vip-name { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+  .vip-title { font-size: 11px; color: var(--text-secondary); margin-bottom: 6px; }
+  .vip-status-badge {
+    font-size: 10px; padding: 2px 8px; border-radius: 20px; font-weight: 500; display: inline-block;
+  }
+  .vip-status-badge.confirmed { background: var(--accent-green-dim); color: var(--accent-green); }
+  .vip-status-badge.invited { background: var(--accent-blue-dim); color: var(--accent-blue); }
+  .vip-status-badge.arrived { background: var(--accent-amber-dim); color: var(--accent-amber); }
+  .vip-status-badge.declined { background: var(--accent-red-dim); color: var(--accent-red); }
+
+  /* Seating Layout */
+  .seating-canvas {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: var(--radius-lg); padding: 20px;
+    display: flex; flex-direction: column; align-items: center; gap: 16px;
+    min-height: 300px;
+  }
+  .stage-label {
+    background: rgba(59,130,246,0.12); border: 1px solid rgba(59,130,246,0.25);
+    color: var(--accent-blue); font-size: 11px; font-weight: 600;
+    letter-spacing: 1px; text-transform: uppercase;
+    padding: 6px 40px; border-radius: var(--radius-sm); width: 100%; text-align: center;
+  }
+  .seating-row { display: flex; gap: 8px; align-items: center; justify-content: center; flex-wrap: wrap; }
+  .seat {
+    width: 56px; height: 44px; border-radius: var(--radius-sm);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 600; text-align: center; cursor: pointer;
+    transition: transform 0.1s;
+    border: 1px solid transparent;
+  }
+  .seat:hover { transform: scale(1.05); }
+  .seat.royalty { background: rgba(245,158,11,0.15); color: var(--accent-amber); border-color: rgba(245,158,11,0.25); }
+  .seat.vvip { background: rgba(239,68,68,0.1); color: var(--accent-red); border-color: rgba(239,68,68,0.2); }
+  .seat.vip { background: var(--accent-blue-dim); color: var(--accent-blue); border-color: var(--border-accent); }
+  .seat.empty { background: rgba(255,255,255,0.03); color: var(--text-muted); border-color: var(--border); border-style: dashed; }
+
+  /* Traffic module */
+  .traffic-map {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: var(--radius-lg); padding: 20px; position: relative; min-height: 260px;
+    display: flex; flex-direction: column; align-items: center;
+  }
+  .traffic-route {
+    display: flex; align-items: center; gap: 0;
+    width: 100%; justify-content: center; margin: 20px 0;
+  }
+  .traffic-node {
+    background: var(--bg-panel); border: 1px solid var(--border);
+    border-radius: var(--radius-md); padding: 10px 14px;
+    font-size: 12px; font-weight: 500; text-align: center; min-width: 100px;
+  }
+  .traffic-node.start { border-color: var(--accent-green); color: var(--accent-green); }
+  .traffic-node.end { border-color: var(--accent-blue); color: var(--accent-blue); }
+  .traffic-node.checkpoint { border-color: var(--accent-amber); color: var(--accent-amber); }
+  .traffic-arrow { color: var(--text-muted); font-size: 20px; margin: 0 4px; }
+  .eta-cards { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; width: 100%; }
+  .eta-card {
+    background: var(--bg-panel); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 12px; text-align: center;
+  }
+  .eta-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+  .eta-value { font-size: 20px; font-weight: 600; color: var(--text-primary); }
+  .eta-sub { font-size: 10px; color: var(--text-secondary); margin-top: 2px; }
+
+  /* Stage & Cue Board */
+  .cue-list { display: flex; flex-direction: column; gap: 10px; }
+  .cue-item {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: var(--radius-md); padding: 14px 16px;
+    display: flex; align-items: center; gap: 14px;
+  }
+  .cue-num {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: var(--accent-blue-dim); color: var(--accent-blue);
+    font-size: 12px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .cue-text { flex: 1; }
+  .cue-title { font-size: 13px; font-weight: 500; margin-bottom: 2px; }
+  .cue-detail { font-size: 11px; color: var(--text-secondary); }
+  .cue-status { font-size: 11px; }
+  .cue-status.live { color: var(--accent-green); }
+  .cue-status.standby { color: var(--accent-amber); }
+  .cue-status.ready { color: var(--text-muted); }
+
+  /* AI Chat panel within workspace */
+  .ai-chat-wrap { display: flex; flex-direction: column; height: 100%; }
+  .ai-messages { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+  .ai-msg { max-width: 88%; }
+  .ai-msg.assistant { align-self: flex-start; }
+  .ai-msg.user { align-self: flex-end; }
+  .ai-bubble {
+    padding: 12px 14px; border-radius: var(--radius-md); font-size: 13px; line-height: 1.6;
+  }
+  .ai-msg.assistant .ai-bubble { background: var(--bg-card); border: 1px solid var(--border); color: var(--text-primary); }
+  .ai-msg.user .ai-bubble { background: var(--accent-blue); color: #fff; }
+  .ai-sender { font-size: 11px; color: var(--text-muted); margin-bottom: 4px; }
+  .ai-input-bar {
+    display: flex; gap: 10px; margin-top: 16px;
+    padding: 14px; background: var(--bg-card); border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+  }
+  .ai-input-bar textarea {
+    flex: 1; background: transparent; border: none; outline: none;
+    color: var(--text-primary); font-size: 13px; font-family: var(--font);
+    resize: none; line-height: 1.5; max-height: 120px;
+  }
+  .ai-input-bar textarea::placeholder { color: var(--text-muted); }
+  .btn-send {
+    background: var(--accent-blue); color: #fff; border: none;
+    border-radius: var(--radius-sm); width: 36px; height: 36px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; align-self: flex-end; flex-shrink: 0; transition: opacity 0.15s;
+  }
+  .btn-send:hover { opacity: 0.88; }
+
+  /* ── RIGHT PANEL: MODULES ── */
+  #right-panel {
+    width: 220px;
+    flex-shrink: 0;
+    background: var(--bg-card);
+    border-left: 1px solid var(--border);
+    display: flex; flex-direction: column;
+    overflow: hidden;
+  }
+  .right-panel-header {
+    padding: 16px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .modules-list { flex: 1; overflow-y: auto; padding: 10px 12px; display: flex; flex-direction: column; gap: 6px; }
+  .module-btn {
+    background: var(--bg-panel); border: 1px solid var(--border);
+    border-radius: var(--radius-md); padding: 12px;
+    cursor: pointer; transition: border-color 0.12s, background 0.12s;
+    text-align: left;
+  }
+  .module-btn:hover { background: var(--bg-hover); border-color: var(--border-accent); }
+  .module-btn.active { background: var(--accent-blue-dim); border-color: var(--border-accent); }
+  .module-btn-icon {
+    width: 32px; height: 32px; border-radius: var(--radius-sm);
+    background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center;
+    margin-bottom: 8px;
+  }
+  .module-btn.active .module-btn-icon { background: rgba(59,130,246,0.2); }
+  .module-btn-icon i { font-size: 16px; color: var(--text-secondary); }
+  .module-btn.active .module-btn-icon i { color: var(--accent-blue); }
+  .module-btn-title { font-size: 13px; font-weight: 500; color: var(--text-primary); margin-bottom: 2px; }
+  .module-btn-sub { font-size: 11px; color: var(--text-muted); }
+
+  /* Event info section in right panel */
+  .event-info-section { padding: 12px 12px 0; }
+  .info-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border); }
+  .info-label { font-size: 11px; color: var(--text-muted); }
+  .info-value { font-size: 11px; color: var(--text-primary); font-weight: 500; text-align: right; }
+
+  /* CREATE EVENT MODAL */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+    display: none; align-items: center; justify-content: center; z-index: 200;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: var(--radius-lg); padding: 28px; width: 480px; max-width: 95vw;
+    max-height: 85vh; overflow-y: auto;
+  }
+  .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+  .modal-header h2 { font-size: 17px; font-weight: 600; }
+  .modal-close { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 20px; padding: 4px; }
+  .modal-close:hover { color: var(--text-primary); }
+  .form-field { margin-bottom: 18px; }
+  .form-label { display: block; font-size: 12px; font-weight: 500; color: var(--text-secondary); margin-bottom: 6px; }
+  .form-input, .form-select, .form-textarea {
+    width: 100%; background: var(--bg-input); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 10px 14px; color: var(--text-primary);
+    font-size: 14px; font-family: var(--font); outline: none; transition: border-color 0.15s;
+    appearance: none;
+  }
+  .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--accent-blue); }
+  .form-textarea { resize: vertical; min-height: 80px; }
+  .form-select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237b8599' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 36px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .modal-actions { display: flex; gap: 10px; margin-top: 4px; }
+  .btn-cancel {
+    flex: 1; background: transparent; border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 10px; color: var(--text-secondary);
+    cursor: pointer; font-size: 14px; font-family: var(--font); transition: background 0.15s;
+  }
+  .btn-cancel:hover { background: var(--bg-hover); }
+  .btn-create { flex: 2; }
+
+  /* TOAST */
+  #toast {
+    position: fixed; bottom: 24px; right: 24px;
+    background: var(--bg-panel); border: 1px solid var(--border);
+    border-radius: var(--radius-md); padding: 12px 18px;
+    font-size: 13px; color: var(--text-primary);
+    display: flex; align-items: center; gap: 10px;
+    transform: translateY(80px); opacity: 0; transition: transform 0.3s, opacity 0.3s;
+    z-index: 300;
+  }
+  #toast.show { transform: translateY(0); opacity: 1; }
+  #toast i { color: var(--accent-green); }
+
+  /* Scrollbars */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.14); }
+
+  /* Typing indicator */
+  .typing { display: flex; gap: 4px; align-items: center; padding: 4px 0; }
+  .typing span { width: 6px; height: 6px; border-radius: 50%; background: var(--text-muted); animation: typing-bounce 1.2s infinite; }
+  .typing span:nth-child(2) { animation-delay: 0.15s; }
+  .typing span:nth-child(3) { animation-delay: 0.3s; }
+  @keyframes typing-bounce { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-5px)} }
+
+  .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 60px 20px; color: var(--text-muted); text-align: center; }
+  .empty-state i { font-size: 36px; opacity: 0.4; }
+  .empty-state p { font-size: 13px; }
+</style>
+</head>
+<body>
+
+<!-- ══════════ AUTH SCREEN ══════════ -->
+<div id="auth-screen">
+  <div class="auth-logo"><i class="ti ti-shield-check"></i></div>
+  <div class="auth-title">Cadence Operations</div>
+  <div class="auth-sub">Sign in to your command terminal</div>
+  <div class="auth-card">
+    <div class="field">
+      <label>Operator ID</label>
+      <input type="text" id="auth-user" placeholder="Enter your username" value="sai">
+    </div>
+    <div class="field">
+      <label>Access Code</label>
+      <div class="input-wrap">
+        <input type="password" id="auth-pass" placeholder="••••••••" value="password">
+        <button class="eye-btn" onclick="togglePass()"><i class="ti ti-eye" id="eye-icon"></i></button>
+      </div>
+    </div>
+    <div class="field">
+      <label>Operational Role</label>
+      <select id="auth-role">
+        <option>Operations Commander</option>
+        <option>Protocol Officer</option>
+        <option>Event Organizer</option>
+        <option>Stage Manager</option>
+        <option>Usher</option>
+      </select>
+    </div>
+    <button class="btn-primary" onclick="doLogin()">Sign In</button>
+  </div>
+  <div class="auth-footer">RESTRICTED ACCESS — AUTHORISED PERSONNEL ONLY</div>
+</div>
+
+<!-- ══════════ APP ══════════ -->
+<div id="app">
+
+  <!-- TOPBAR -->
+  <div id="topbar">
+    <div class="topbar-logo">
+      <div class="topbar-icon"><i class="ti ti-shield-check"></i></div>
+      <span class="topbar-name">Cadence</span>
+    </div>
+    <span class="topbar-sep">·</span>
+    <span class="topbar-ctx" id="topbar-ctx">Event Operations Hub</span>
+    <div class="topbar-right">
+      <div class="conn-badge" id="conn-badge" style="display:none">
+        <span class="conn-dot"></span> CONNECTED
+      </div>
+      <span class="topbar-role" id="topbar-role"></span>
+      <button class="btn-icon" onclick="doLogout()"><i class="ti ti-logout" style="font-size:14px"></i> Sign out</button>
+    </div>
+  </div>
+
+  <div id="main">
+
+    <!-- ══ EVENTS LIST ══ -->
+    <div id="events-view" class="active">
+      <div class="events-header">
+        <h1>Events</h1>
+        <p>Select an event to open its command workspace.</p>
+      </div>
+      <div class="events-top-bar">
+        <div class="search-wrap">
+          <i class="ti ti-search"></i>
+          <input type="text" placeholder="Search events…" oninput="filterEvents(this.value)" id="search-input">
+        </div>
+        <button class="btn-new" onclick="openCreateModal()">
+          <i class="ti ti-plus" style="font-size:15px"></i> New Event
+        </button>
+      </div>
+      <div class="events-grid" id="events-grid"></div>
+    </div>
+
+    <!-- ══ WORKSPACE ══ -->
+    <div id="workspace-view">
+
+      <!-- LEFT: Sources -->
+      <div id="left-panel">
+        <div class="panel-header">
+          <div class="panel-label">Sources</div>
+          <div class="panel-count" id="sources-count">0 documents</div>
+        </div>
+        <div class="drop-zone" onclick="simulateUpload()">
+          <i class="ti ti-upload"></i>
+          <p>Drop files here or <span>browse</span></p>
+          <div class="file-types">PDF, JSON, XLSX</div>
+        </div>
+        <div class="sources-list" id="sources-list"></div>
+      </div>
+
+      <!-- CENTER: Workspace -->
+      <div id="center-panel">
+        <div class="workspace-header">
+          <div class="workspace-title" id="ws-title"></div>
+          <div class="workspace-sub" id="ws-sub"></div>
+        </div>
+        <div class="module-tabs" id="module-tabs">
+          <button class="module-tab active" data-tab="running-order" onclick="switchTab('running-order')">
+            <i class="ti ti-timeline"></i> Running Order
+          </button>
+          <button class="module-tab" data-tab="vip-list" onclick="switchTab('vip-list')">
+            <i class="ti ti-users"></i> VIP List
+          </button>
+          <button class="module-tab" data-tab="seating" onclick="switchTab('seating')">
+            <i class="ti ti-layout-rows"></i> Seating
+          </button>
+          <button class="module-tab" data-tab="traffic" onclick="switchTab('traffic')">
+            <i class="ti ti-car"></i> Traffic
+          </button>
+          <button class="module-tab" data-tab="ai-chat" onclick="switchTab('ai-chat')">
+            <i class="ti ti-sparkles"></i> AI Assistant
+          </button>
+        </div>
+
+        <!-- Running Order -->
+        <div class="module-content active" id="tab-running-order">
+          <table class="ro-table" id="ro-table">
+            <thead>
+              <tr>
+                <th style="width:110px">TIME</th>
+                <th style="width:48px">DUR</th>
+                <th>ACTIVITY</th>
+                <th style="width:180px">ROLE</th>
+                <th style="width:90px">STATUS</th>
+              </tr>
+            </thead>
+            <tbody id="ro-tbody"></tbody>
+          </table>
+        </div>
+
+        <!-- VIP List -->
+        <div class="module-content" id="tab-vip-list">
+          <div class="vip-grid" id="vip-grid"></div>
+        </div>
+
+        <!-- Seating -->
+        <div class="module-content" id="tab-seating">
+          <div class="seating-canvas" id="seating-canvas"></div>
+        </div>
+
+        <!-- Traffic -->
+        <div class="module-content" id="tab-traffic">
+          <div class="traffic-map" id="traffic-map"></div>
+        </div>
+
+        <!-- AI Chat -->
+        <div class="module-content" id="tab-ai-chat" style="display:flex; flex-direction:column; overflow:hidden; height:calc(100% - 0px);">
+          <div class="ai-chat-wrap">
+            <div class="ai-messages" id="ai-messages"></div>
+            <div class="ai-input-bar">
+              <textarea id="ai-input" placeholder="Ask about this event, running order, VIP protocol…" rows="1" onkeydown="handleAiKey(event)"></textarea>
+              <button class="btn-send" onclick="sendAiMessage()"><i class="ti ti-send" style="font-size:15px"></i></button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Emergency Bar -->
+        <div class="emergency-bar" id="emergency-bar" style="display:none">
+          <i class="ti ti-alert-triangle emergency-icon"></i>
+          <div style="flex:1">
+            <div class="emergency-label">Emergency Runtime Override</div>
+            <input class="emergency-input" id="emergency-input" placeholder="e.g. VVIP Convoy delayed 20 minutes due to traffic on Jalan Skudai…">
+          </div>
+          <button class="btn-broadcast" onclick="broadcast()">Broadcast</button>
+        </div>
+      </div>
+
+      <!-- RIGHT: Modules -->
+      <div id="right-panel">
+        <div class="right-panel-header">
+          <div class="panel-label">Modules</div>
+          <div class="panel-count">Select operational view</div>
+        </div>
+
+        <div class="event-info-section" id="event-info-section"></div>
+
+        <div class="modules-list">
+          <div class="module-btn active" onclick="switchModule('running-order', this)">
+            <div class="module-btn-icon"><i class="ti ti-timeline"></i></div>
+            <div class="module-btn-title">Running Order</div>
+            <div class="module-btn-sub">Timeline & schedule cues</div>
+          </div>
+          <div class="module-btn" onclick="switchModule('vip-list', this)">
+            <div class="module-btn-icon"><i class="ti ti-users"></i></div>
+            <div class="module-btn-title">VIP Management</div>
+            <div class="module-btn-sub">Guest list & protocol</div>
+          </div>
+          <div class="module-btn" onclick="switchModule('seating', this)">
+            <div class="module-btn-icon"><i class="ti ti-layout-rows"></i></div>
+            <div class="module-btn-title">Seating Layout</div>
+            <div class="module-btn-sub">Floor plan & assignments</div>
+          </div>
+          <div class="module-btn" onclick="switchModule('traffic', this)">
+            <div class="module-btn-icon"><i class="ti ti-car"></i></div>
+            <div class="module-btn-title">Traffic & Motorcade</div>
+            <div class="module-btn-sub">Convoy tracking & ETA</div>
+          </div>
+          <div class="module-btn" onclick="switchModule('ai-chat', this)">
+            <div class="module-btn-icon"><i class="ti ti-sparkles"></i></div>
+            <div class="module-btn-title">AI Assistant</div>
+            <div class="module-btn-sub">Event intelligence</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<!-- ══ CREATE EVENT MODAL ══ -->
+<div class="modal-overlay" id="create-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>Create New Event</h2>
+      <button class="modal-close" onclick="closeCreateModal()"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="form-field">
+      <label class="form-label">Event Name</label>
+      <input class="form-input" id="new-name" placeholder="e.g. Majlis Santapan Diraja Johor">
+    </div>
+    <div class="form-field">
+      <label class="form-label">Event Type</label>
+      <input class="form-input" id="new-type" placeholder="e.g. Annual Royal Banquet — State Protocol Grade I">
+    </div>
+    <div class="form-row">
+      <div class="form-field">
+        <label class="form-label">Date</label>
+        <input class="form-input" type="date" id="new-date">
+      </div>
+      <div class="form-field">
+        <label class="form-label">Status</label>
+        <select class="form-select" id="new-status">
+          <option value="draft">Draft</option>
+          <option value="live">Live</option>
+          <option value="completed">Completed</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-field">
+      <label class="form-label">Venue</label>
+      <input class="form-input" id="new-venue" placeholder="e.g. Istana Besar">
+    </div>
+    <div class="form-field">
+      <label class="form-label">Notes</label>
+      <textarea class="form-textarea" id="new-notes" placeholder="Additional details…"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeCreateModal()">Cancel</button>
+      <button class="btn-primary btn-create" onclick="createEvent()">Create Event</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"><i class="ti ti-check"></i> <span id="toast-msg"></span></div>
+
+<script>
+// ══════════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════════
+let currentUser = null;
+let currentEvent = null;
+let chatHistory = [];
+
+const EVENTS = [
+  {
+    id: 1, name: "Majlis Santapan Diraja Johor",
+    type: "Annual Royal Banquet — State Protocol Grade I",
+    date: "15 Jun 2026", venue: "Istana Besar", status: "live", docs: 4,
+    running_order: [
+      { time:"18:00–18:15", dur:"15m", activity:"Guest Assembly & Registration",   loc:"Main Foyer",   role:"Ground Usher / Reception",          status:"passed" },
+      { time:"18:15–18:30", dur:"15m", activity:"VIP Arrival & Escort to Hall",    loc:"South Portico", role:"Protocol Officer",                  status:"passed" },
+      { time:"18:30–18:45", dur:"15m", activity:"DYMM Sultan Arrival — State Honours", loc:"Grand Entrance", role:"Protocol Officer & VVIP Escort", status:"on-air" },
+      { time:"18:45–19:00", dur:"15m", activity:"Recitation of Doa",               loc:"Main Dewan",   role:"Emcee / Religious Affairs",           status:"next" },
+      { time:"19:00–19:30", dur:"30m", activity:"Royal Address",                   loc:"Main Dewan",   role:"Stage Manager / Teleprompter",        status:"pending" },
+      { time:"19:30–21:00", dur:"90m", activity:"State Banquet Dinner",            loc:"Main Dewan",   role:"All Protocol Officers",               status:"pending" },
+    ],
+    vips: [
+      { name:"DYMM Sultan Ibrahim",      title:"Sultan of Johor",          category:"royalty", rank:1, status:"arrived" },
+      { name:"YAB Menteri Besar Johor",  title:"Chief Minister of Johor",   category:"vvip",   rank:2, status:"confirmed" },
+      { name:"YB Datuk Onn Ibrahim",     title:"State Secretary",           category:"vip",    rank:3, status:"confirmed" },
+      { name:"Tan Sri Razali Hassan",    title:"Chairman, IRDA",            category:"vip",    rank:4, status:"invited" },
+      { name:"YBhg. Dato' Faizal",       title:"Director General, SUKJ",    category:"official", rank:5, status:"confirmed" },
+      { name:"Puan Sri Rohani Ahmad",    title:"Head, Royal Protocol",      category:"official", rank:6, status:"confirmed" },
+    ],
+    sources: [
+      { name:"Johor_State_Protocol_G…", size:"2.4 MB", status:"parsed", type:"pdf" },
+      { name:"VVIP_SeatingPriorities…", size:"48 KB",  status:"parsed", type:"pdf" },
+      { name:"Royal_Aide_Briefing_No…", size:"1.1 MB", status:"processing", type:"pdf" },
+      { name:"Convoy_Arrival_Schedul…", size:"92 KB",  status:"parsed", type:"pdf" },
+    ],
+    seating: {
+      rows:[
+        [{ label:"DYMM\nSultan", cat:"royalty"}, { label:"Raja\nPermaisuri", cat:"royalty"}, { label:"Tengku\nMahkota", cat:"royalty"}],
+        [{ label:"Menteri\nBesar", cat:"vvip"}, { label:"YB\nDatuk", cat:"vip"}, { label:"", cat:"empty"}, { label:"Tan Sri\nRazali", cat:"vip"}, { label:"YB\nSetiausaha", cat:"vip"}],
+        [{ label:"Dir.\nGen.", cat:"official"}, { label:"Official", cat:"official"}, { label:"", cat:"empty"}, { label:"", cat:"empty"}, { label:"Official", cat:"official"}, { label:"Dir.\nGen.", cat:"official"}],
+      ]
+    },
+    traffic: {
+      route:["Istana Bukit Serene","Jalan Skudai","Jalan Air Molek","Istana Besar"],
+      eta_mins: 22, distance:"14.3 km", convoy_size: 7
+    },
+    ai_context: "You are an AI assistant for the Majlis Santapan Diraja Johor, a live royal state banquet at Istana Besar on 15 June 2026. The event is currently ON AIR — Sultan has just arrived. Running order is in progress. Answer concisely and assist with protocol, timing adjustments, VIP arrangements, and emergency decisions."
+  },
+  {
+    id: 2, name: "Hari Keputeraan Sultan Ibrahim",
+    type: "Royal Birthday Parade & Public Address Ceremony",
+    date: "22 Jun 2026", venue: "Dataran Bandaraya JB", status: "draft", docs: 2,
+    running_order: [
+      { time:"08:00–08:30", dur:"30m", activity:"Guard of Honour Assembly",  loc:"Dataran Bandaraya", role:"Military Protocol",        status:"pending" },
+      { time:"08:30–09:00", dur:"30m", activity:"Public Assembly & Seating", loc:"Grandstand",         role:"Ushers / Ground Team",    status:"pending" },
+      { time:"09:00–09:15", dur:"15m", activity:"Royal Procession",          loc:"Main Road",          role:"Protocol Officer",        status:"pending" },
+      { time:"09:15–09:45", dur:"30m", activity:"Inspection of Guard",       loc:"Dataran",            role:"Sultan & Military Cmdr",  status:"pending" },
+      { time:"09:45–10:15", dur:"30m", activity:"Royal Birthday Address",    loc:"Main Stage",         role:"Stage Manager",           status:"pending" },
+      { time:"10:15–10:45", dur:"30m", activity:"Cultural Performances",     loc:"Main Stage",         role:"Arts & Cultural Unit",    status:"pending" },
+    ],
+    vips: [
+      { name:"DYMM Sultan Ibrahim",        title:"Sultan of Johor",         category:"royalty", rank:1, status:"confirmed" },
+      { name:"YAM Tengku Mahkota",         title:"Crown Prince of Johor",   category:"royalty", rank:2, status:"confirmed" },
+      { name:"YAB Menteri Besar",          title:"Chief Minister",          category:"vvip",    rank:3, status:"invited" },
+    ],
+    sources: [
+      { name:"Birthday_Parade_Brief…",    size:"820 KB", status:"parsed", type:"pdf" },
+      { name:"Traffic_Diversion_Plan…",   size:"1.4 MB", status:"parsed", type:"docx" },
+    ],
+    seating: {
+      rows:[
+        [{ label:"DYMM\nSultan", cat:"royalty"}, { label:"Tengku\nMahkota", cat:"royalty"}],
+        [{ label:"Menteri\nBesar", cat:"vvip"}, { label:"", cat:"empty"}, { label:"YB\nDatuk", cat:"vip"}],
+      ]
+    },
+    traffic: { route:["Istana Bukit Serene","Jalan Tun Abdul Razak","Dataran Bandaraya JB"], eta_mins:18, distance:"9.2 km", convoy_size:11 },
+    ai_context: "You are an AI assistant for Hari Keputeraan Sultan Ibrahim on 22 June 2026 at Dataran Bandaraya JB. This is currently a draft event in planning phase. Help with parade logistics, VIP protocol, guard of honour arrangements, and ceremony scheduling."
+  },
+  {
+    id: 3, name: "International Tech Summit 2026",
+    type: "Ministerial-Grade Regional Technology Forum — ASEAN Delegates",
+    date: "10 Jul 2026", venue: "Persada Johor International Convention Centre", status: "draft", docs: 1,
+    running_order: [
+      { time:"08:30–09:00", dur:"30m", activity:"Delegate Registration",          loc:"Main Lobby",    role:"Registration Desk Team",  status:"pending" },
+      { time:"09:00–09:30", dur:"30m", activity:"Ministerial Arrival & Escort",   loc:"VIP Entrance",  role:"Protocol Officer",        status:"pending" },
+      { time:"09:30–10:00", dur:"30m", activity:"Opening Ceremony",               loc:"Main Hall",     role:"Emcee",                   status:"pending" },
+      { time:"10:00–11:30", dur:"90m", activity:"Keynote: AI & Regional Economy", loc:"Main Hall",     role:"Stage Manager",           status:"pending" },
+      { time:"11:30–12:00", dur:"30m", activity:"Panel Discussion",               loc:"Main Hall",     role:"Moderator",               status:"pending" },
+    ],
+    vips: [
+      { name:"YB Minister of Digital", title:"Minister, MOSTI",             category:"vvip",    rank:1, status:"invited" },
+      { name:"ASEAN Tech Director",    title:"ASEAN Secretariat",           category:"vip",     rank:2, status:"invited" },
+      { name:"Dr. Lim Wei Keong",      title:"CEO, Johor Digital Economy",  category:"official",rank:3, status:"confirmed" },
+    ],
+    sources: [
+      { name:"Tech_Summit_Programme…", size:"540 KB", status:"parsed", type:"pdf" },
+    ],
+    seating: {
+      rows:[
+        [{ label:"Minister\nMOSTI", cat:"vvip"}, { label:"ASEAN\nDirector", cat:"vip"}, { label:"Dr.\nLim", cat:"official"}],
+        [{ label:"", cat:"empty"}, { label:"Delegate", cat:"official"}, { label:"Delegate", cat:"official"}, { label:"Delegate", cat:"official"}],
+      ]
+    },
+    traffic: { route:["KLIA2","Lebuhraya Utara-Selatan","Persada JICC"], eta_mins:35, distance:"52 km", convoy_size:3 },
+    ai_context: "You are an AI assistant for the International Tech Summit 2026 at Persada Johor ICC on 10 July 2026. This is a ministerial-grade ASEAN technology forum in planning stage. Help with delegate management, session scheduling, and ministerial protocol."
+  },
+  {
+    id: 4, name: "Majlis Konvokesyen UTM",
+    type: "University Convocation Ceremony — Chancellor Presiding",
+    date: "3 Aug 2026", venue: "Dewan Sultan Iskander", status: "completed", docs: 6,
+    running_order: [
+      { time:"08:00–08:30", dur:"30m", activity:"Academic Procession Assembly",  loc:"Foyer",        role:"Academic Registrar",      status:"passed" },
+      { time:"08:30–09:00", dur:"30m", activity:"Chancellor Arrival",            loc:"Main Entrance", role:"Protocol Officer",       status:"passed" },
+      { time:"09:00–09:30", dur:"30m", activity:"Opening of Convocation",        loc:"Dewan",        role:"Emcee / Registrar",       status:"passed" },
+      { time:"09:30–12:00", dur:"150m", activity:"Conferment of Degrees",        loc:"Dewan",        role:"Chancellor & Dean",       status:"passed" },
+      { time:"12:00–12:15", dur:"15m", activity:"Closing & Recession",           loc:"Dewan",        role:"Emcee",                   status:"passed" },
+    ],
+    vips: [
+      { name:"DYMM Sultan Ibrahim",     title:"Chancellor, UTM",     category:"royalty",  rank:1, status:"arrived" },
+      { name:"Prof. Dr. Ahmad Fauzi",   title:"Vice-Chancellor, UTM", category:"vvip",   rank:2, status:"arrived" },
+      { name:"YB Minister of Edu.",     title:"Minister, MOE",        category:"vip",    rank:3, status:"arrived" },
+    ],
+    sources: [
+      { name:"Convocation_Runsheet…",   size:"1.1 MB", status:"parsed", type:"pdf" },
+      { name:"Degree_Recipients_List…", size:"3.8 MB", status:"parsed", type:"pdf" },
+      { name:"Academic_Protocol_Gu…",   size:"740 KB", status:"parsed", type:"pdf" },
+      { name:"Chancellor_Briefing…",    size:"890 KB", status:"parsed", type:"pdf" },
+      { name:"Venue_FloorPlan_DSI…",    size:"2.1 MB", status:"parsed", type:"pdf" },
+      { name:"AV_Technical_Rider…",     size:"340 KB", status:"parsed", type:"docx" },
+    ],
+    seating: {
+      rows:[
+        [{ label:"Chancellor\nSultan", cat:"royalty"}, { label:"VC\nProf.", cat:"vvip"}],
+        [{ label:"Minister\nMOE", cat:"vip"}, { label:"Dean\nEngg", cat:"official"}, { label:"Dean\nSci", cat:"official"}],
+        [{ label:"Registrar", cat:"official"}, { label:"", cat:"empty"}, { label:"Bursar", cat:"official"}],
+      ]
+    },
+    traffic: { route:["Istana Bukit Serene","Lebuhraya Pasir Gudang","UTM Campus"], eta_mins:28, distance:"18.7 km", convoy_size:5 },
+    ai_context: "You are an AI assistant for the Majlis Konvokesyen UTM, which has been completed on 3 August 2026. Help review the event, answer questions about what occurred, and assist with post-event documentation and reporting."
+  },
+];
+
+// ══════════════════════════════════════════════
+//  AUTH
+// ══════════════════════════════════════════════
+function togglePass() {
+  const inp = document.getElementById('auth-pass');
+  const icon = document.getElementById('eye-icon');
+  if (inp.type === 'password') { inp.type = 'text'; icon.className = 'ti ti-eye-off'; }
+  else { inp.type = 'password'; icon.className = 'ti ti-eye'; }
+}
+
+function doLogin() {
+  const user = document.getElementById('auth-user').value.trim();
+  const role = document.getElementById('auth-role').value;
+  if (!user) { showToast('Enter your Operator ID'); return; }
+  currentUser = { username: user, role };
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('app').classList.add('active');
+  document.getElementById('topbar-role').textContent = user + ' · ' + role;
+  renderEvents();
+}
+
+function doLogout() {
+  currentUser = null; currentEvent = null;
+  document.getElementById('auth-screen').style.display = 'flex';
+  document.getElementById('app').classList.remove('active');
+  document.getElementById('auth-user').value = '';
+  document.getElementById('auth-pass').value = '';
+}
+
+// ══════════════════════════════════════════════
+//  EVENTS LIST
+// ══════════════════════════════════════════════
+function renderEvents(filter='') {
+  const grid = document.getElementById('events-grid');
+  const events = EVENTS.filter(e =>
+    e.name.toLowerCase().includes(filter.toLowerCase()) ||
+    e.venue.toLowerCase().includes(filter.toLowerCase())
+  );
+  grid.innerHTML = events.map(ev => `
+    <div class="event-card" onclick="openEvent(${ev.id})">
+      <div class="event-card-top">
+        <span class="status-badge ${ev.status}">
+          <span class="status-dot"></span>
+          ${capitalize(ev.status)}
+        </span>
+        <i class="ti ti-chevron-right card-arrow"></i>
+      </div>
+      <h3>${ev.name}</h3>
+      <div class="event-desc">${ev.type}</div>
+      <div class="event-meta">
+        <span><i class="ti ti-calendar" style="font-size:12px"></i> ${ev.date}</span>
+        <span class="meta-dot">·</span>
+        <span><i class="ti ti-map-pin" style="font-size:12px"></i> ${ev.venue}</span>
+        <span class="meta-dot">·</span>
+        <span>${ev.docs} docs</span>
+      </div>
+    </div>
+  `).join('');
+  if (!events.length) {
+    grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><i class="ti ti-search"></i><p>No events found</p></div>';
+  }
+}
+
+function filterEvents(val) { renderEvents(val); }
+
+function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+
+// ══════════════════════════════════════════════
+//  OPEN EVENT
+// ══════════════════════════════════════════════
+function openEvent(id) {
+  currentEvent = EVENTS.find(e => e.id === id);
+  chatHistory = [];
+  document.getElementById('events-view').classList.remove('active');
+  document.getElementById('workspace-view').classList.add('active');
+  document.getElementById('topbar-ctx').textContent = currentEvent.name;
+
+  const isLive = currentEvent.status === 'live';
+  const connBadge = document.getElementById('conn-badge');
+  connBadge.style.display = isLive ? 'flex' : 'none';
+
+  // Back button in topbar
+  const topbarCtx = document.getElementById('topbar-ctx');
+  topbarCtx.innerHTML = `
+    <button class="back-btn" onclick="goBack()"><i class="ti ti-arrow-left" style="font-size:14px"></i> Back</button>
+    <span style="color:var(--text-muted);margin:0 6px">·</span>
+    ${currentEvent.name}
+    ${isLive ? '<span class="status-badge live" style="margin-left:10px;font-size:11px"><span class="status-dot"></span> LIVE</span>' : ''}
+  `;
+  topbarCtx.style.display = 'flex'; topbarCtx.style.alignItems = 'center';
+
+  // Workspace header
+  document.getElementById('ws-title').textContent = 'Running Order Timeline';
+  document.getElementById('ws-sub').textContent = 'Live event schedule — ' + currentEvent.name;
+
+  // Emergency bar
+  document.getElementById('emergency-bar').style.display = isLive ? 'flex' : 'none';
+
+  renderSources();
+  renderRunningOrder();
+  renderVips();
+  renderSeating();
+  renderTraffic();
+  renderEventInfo();
+  initAiChat();
+  switchTab('running-order');
+  switchModuleBtn(document.querySelector('.module-btn'));
+}
+
+function goBack() {
+  document.getElementById('workspace-view').classList.remove('active');
+  document.getElementById('events-view').classList.add('active');
+  document.getElementById('conn-badge').style.display = 'none';
+  const topbarCtx = document.getElementById('topbar-ctx');
+  topbarCtx.textContent = 'Event Operations Hub';
+  topbarCtx.style.display = '';
+  currentEvent = null;
+}
+
+// ══════════════════════════════════════════════
+//  SOURCES
+// ══════════════════════════════════════════════
+function renderSources() {
+  const ev = currentEvent;
+  document.getElementById('sources-count').textContent = ev.sources.length + ' documents';
+  document.getElementById('sources-list').innerHTML = ev.sources.map((s,i) => `
+    <div class="source-item ${i===0?'active':''}" onclick="selectSource(this)">
+      <i class="ti ti-${s.type==='pdf'?'file-type-pdf':(s.type==='docx'?'file-word':'file-spreadsheet')} source-icon"></i>
+      <div class="source-info">
+        <div class="source-name" title="${s.name}">${s.name}</div>
+        <span class="source-badge ${s.status}">${s.status.toUpperCase()}</span>
+      </div>
+      <div class="source-size">${s.size}</div>
+    </div>
+  `).join('');
+}
+
+function selectSource(el) {
+  document.querySelectorAll('.source-item').forEach(x => x.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function simulateUpload() {
+  const names = ['Protocol_Brief_2026.pdf','VIP_List_Updated.xlsx','Floor_Plan_Rev2.pdf'];
+  const name = names[Math.floor(Math.random()*names.length)];
+  currentEvent.sources.unshift({ name, size: Math.floor(Math.random()*900+50)+'KB', status:'processing', type:'pdf'});
+  renderSources();
+  document.getElementById('sources-count').textContent = currentEvent.sources.length + ' documents';
+  showToast('Uploading ' + name);
+  setTimeout(()=>{ currentEvent.sources[0].status='parsed'; renderSources(); showToast(name + ' parsed'); }, 2500);
+}
+
+// ══════════════════════════════════════════════
+//  RUNNING ORDER
+// ══════════════════════════════════════════════
+function renderRunningOrder() {
+  const tbody = document.getElementById('ro-tbody');
+  tbody.innerHTML = currentEvent.running_order.map(row => `
+    <tr class="${row.status==='on-air'?'row-on-air':''}">
+      <td class="time-col">${row.time}</td>
+      <td class="dur-col">${row.dur}</td>
+      <td>
+        <div class="activity-name">${row.activity}</div>
+        <div class="activity-loc">${row.loc}</div>
+      </td>
+      <td class="role-col">${row.role}</td>
+      <td><span class="row-status ${row.status}">${row.status.replace('-',' ').toUpperCase()}</span></td>
+    </tr>
+  `).join('');
+}
+
+// ══════════════════════════════════════════════
+//  VIPS
+// ══════════════════════════════════════════════
+function renderVips() {
+  document.getElementById('vip-grid').innerHTML = currentEvent.vips.map(v => {
+    const initials = v.name.split(' ').filter(Boolean).slice(0,2).map(x=>x[0]).join('');
+    return `
+      <div class="vip-card">
+        <div class="vip-avatar ${v.category}">${initials}</div>
+        <div class="vip-info">
+          <div class="vip-rank">#${v.rank} — ${v.category.toUpperCase()}</div>
+          <div class="vip-name">${v.name}</div>
+          <div class="vip-title">${v.title}</div>
+          <span class="vip-status-badge ${v.status}">${capitalize(v.status)}</span>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ══════════════════════════════════════════════
+//  SEATING
+// ══════════════════════════════════════════════
+function renderSeating() {
+  const canvas = document.getElementById('seating-canvas');
+  const ev = currentEvent;
+  canvas.innerHTML = '<div class="stage-label">— Stage / Podium —</div>';
+  ev.seating.rows.forEach(row => {
+    const rowEl = document.createElement('div');
+    rowEl.className = 'seating-row';
+    row.forEach(seat => {
+      const s = document.createElement('div');
+      s.className = 'seat ' + seat.cat;
+      s.textContent = seat.label;
+      rowEl.appendChild(s);
+    });
+    canvas.appendChild(rowEl);
+  });
+}
+
+// ══════════════════════════════════════════════
+//  TRAFFIC
+// ══════════════════════════════════════════════
+function renderTraffic() {
+  const ev = currentEvent;
+  const t = ev.traffic;
+  const map = document.getElementById('traffic-map');
+  const routeHtml = t.route.map((r,i) => `
+    <div class="traffic-node ${i===0?'start':(i===t.route.length-1?'end':'checkpoint')}">${r}</div>
+    ${i<t.route.length-1?'<i class="ti ti-arrow-right traffic-arrow"></i>':''}
+  `).join('');
+  map.innerHTML = `
+    <div style="font-size:13px;font-weight:600;color:var(--text-secondary);align-self:flex-start;margin-bottom:4px">Convoy Route</div>
+    <div class="traffic-route">${routeHtml}</div>
+    <div class="eta-cards">
+      <div class="eta-card">
+        <div class="eta-label">ETA</div>
+        <div class="eta-value">${t.eta_mins}<span style="font-size:14px;font-weight:400;color:var(--text-secondary)"> min</span></div>
+        <div class="eta-sub">Estimated arrival</div>
+      </div>
+      <div class="eta-card">
+        <div class="eta-label">Distance</div>
+        <div class="eta-value">${t.distance}</div>
+        <div class="eta-sub">Total route</div>
+      </div>
+      <div class="eta-card">
+        <div class="eta-label">Convoy</div>
+        <div class="eta-value">${t.convoy_size}<span style="font-size:14px;font-weight:400;color:var(--text-secondary)"> vehicles</span></div>
+        <div class="eta-sub">Escort size</div>
+      </div>
+    </div>
+  `;
+}
+
+// ══════════════════════════════════════════════
+//  EVENT INFO (RIGHT PANEL)
+// ══════════════════════════════════════════════
+function renderEventInfo() {
+  const ev = currentEvent;
+  document.getElementById('event-info-section').innerHTML = `
+    <div class="info-row"><span class="info-label">Date</span><span class="info-value">${ev.date}</span></div>
+    <div class="info-row"><span class="info-label">Venue</span><span class="info-value" style="max-width:110px;text-align:right">${ev.venue}</span></div>
+    <div class="info-row"><span class="info-label">Status</span><span class="status-badge ${ev.status}" style="font-size:10px">${capitalize(ev.status)}</span></div>
+    <div class="info-row"><span class="info-label">Sources</span><span class="info-value">${ev.sources.length} docs</span></div>
+    <div class="info-row" style="border:none"><span class="info-label">VIPs</span><span class="info-value">${ev.vips.length} guests</span></div>
+  `;
+}
+
+// ══════════════════════════════════════════════
+//  AI CHAT
+// ══════════════════════════════════════════════
+function initAiChat() {
+  chatHistory = [];
+  const msgs = document.getElementById('ai-messages');
+  msgs.innerHTML = '';
+  addAiMessage('assistant', `Cadence AI ready. I have access to all ${currentEvent.sources.length} documents for <strong>${currentEvent.name}</strong>. Ask me anything about the running order, VIP protocol, seating, or traffic logistics.`);
+}
+
+function addAiMessage(role, text) {
+  const msgs = document.getElementById('ai-messages');
+  const div = document.createElement('div');
+  div.className = 'ai-msg ' + role;
+  div.innerHTML = `
+    <div class="ai-sender">${role === 'assistant' ? 'Cadence AI' : (currentUser?.username || 'You')}</div>
+    <div class="ai-bubble">${text}</div>
+  `;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function showTyping() {
+  const msgs = document.getElementById('ai-messages');
+  const div = document.createElement('div');
+  div.className = 'ai-msg assistant'; div.id = 'typing-indicator';
+  div.innerHTML = `<div class="ai-sender">Cadence AI</div><div class="ai-bubble"><div class="typing"><span></span><span></span><span></span></div></div>`;
+  msgs.appendChild(div); msgs.scrollTop = msgs.scrollHeight;
+  return div;
+}
+
+function removeTyping() { const t = document.getElementById('typing-indicator'); if(t) t.remove(); }
+
+async function sendAiMessage() {
+  const inp = document.getElementById('ai-input');
+  const text = inp.value.trim();
+  if (!text) return;
+  inp.value = '';
+  addAiMessage('user', text);
+  chatHistory.push({ role:'user', content: text });
+
+  const typingEl = showTyping();
+
+  try {
+    const eventCtx = JSON.stringify({
+      name: currentEvent.name,
+      date: currentEvent.date,
+      venue: currentEvent.venue,
+      status: currentEvent.status,
+      running_order: currentEvent.running_order,
+      vips: currentEvent.vips,
+      sources: currentEvent.sources.map(s=>s.name),
+      traffic: currentEvent.traffic
+    }, null, 2);
+
+    const systemPrompt = `${currentEvent.ai_context}
+
+Current event data:
+${eventCtx}
+
+Be concise, direct, and operational. Use bullet points for lists. Prioritise safety, protocol, and timing.`;
+
+    const messages = [
+      ...chatHistory.slice(0,-1),
+      { role:'user', content: `[Event context provided via system]\n\n${text}` }
+    ];
+
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 1000,
+        system: systemPrompt,
+        messages: messages.map(m => ({ role: m.role, content: m.content }))
+      })
+    });
+    const data = await res.json();
+    removeTyping();
+    const reply = data.content?.[0]?.text || 'Unable to get a response. Please try again.';
+    chatHistory.push({ role:'assistant', content: reply });
+    addAiMessage('assistant', reply.replace(/\n/g,'<br>'));
+  } catch(err) {
+    removeTyping();
+    addAiMessage('assistant', 'Connection error. Please check your network and try again.');
+  }
+}
+
+function handleAiKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendAiMessage(); }
+}
+
+// ══════════════════════════════════════════════
+//  TABS & MODULES
+// ══════════════════════════════════════════════
+function switchTab(tab) {
+  document.querySelectorAll('.module-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+  document.querySelectorAll('.module-content').forEach(c => c.classList.remove('active'));
+  const target = document.getElementById('tab-' + tab);
+  if (target) target.classList.add('active');
+
+  // Workspace header label
+  const labels = {
+    'running-order': { t:'Running Order Timeline', s:'Live event schedule — '+currentEvent?.name },
+    'vip-list':      { t:'VIP Management', s:'Guest list & protocol hierarchy' },
+    'seating':       { t:'Seating Layout', s:'Floor plan & seat assignments' },
+    'traffic':       { t:'Traffic & Motorcade', s:'Convoy tracking & ETA' },
+    'ai-chat':       { t:'AI Assistant', s:'Event intelligence powered by Claude' },
+  };
+  const lbl = labels[tab];
+  if (lbl) {
+    document.getElementById('ws-title').textContent = lbl.t;
+    document.getElementById('ws-sub').textContent = lbl.s;
+  }
+
+  // Hide emergency bar for non-running-order tabs
+  const eb = document.getElementById('emergency-bar');
+  if (eb) eb.style.display = (tab === 'running-order' && currentEvent?.status === 'live') ? 'flex' : 'none';
+}
+
+function switchModule(tab, btn) {
+  switchModuleBtn(btn);
+  switchTab(tab);
+}
+
+function switchModuleBtn(btn) {
+  document.querySelectorAll('.module-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+}
+
+// ══════════════════════════════════════════════
+//  EMERGENCY BROADCAST
+// ══════════════════════════════════════════════
+function broadcast() {
+  const msg = document.getElementById('emergency-input').value.trim();
+  if (!msg) { showToast('Enter a broadcast message first'); return; }
+  showToast('Broadcast sent to all operators');
+  document.getElementById('emergency-input').value = '';
+  // Add to AI chat context
+  chatHistory.push({ role:'user', content:'[EMERGENCY BROADCAST] ' + msg });
+  switchTab('ai-chat');
+  switchModuleBtn(document.querySelectorAll('.module-btn')[4]);
+  addAiMessage('user', '⚠️ ' + msg);
+  const typingEl = showTyping();
+  setTimeout(async()=>{
+    removeTyping();
+    addAiMessage('assistant', `<strong>Emergency acknowledged.</strong> Broadcasting: <em>"${msg}"</em><br><br>Recommended actions:<br>• Notify all department heads immediately<br>• Update running order if timing is affected<br>• Confirm with VIP escort team on revised schedule<br>• Update convoy ETA if traffic-related`);
+  }, 1200);
+}
+
+// ══════════════════════════════════════════════
+//  CREATE EVENT MODAL
+// ══════════════════════════════════════════════
+function openCreateModal() {
+  document.getElementById('create-modal').classList.add('open');
+}
+function closeCreateModal() {
+  document.getElementById('create-modal').classList.remove('open');
+}
+function createEvent() {
+  const name = document.getElementById('new-name').value.trim();
+  if (!name) { showToast('Event name is required'); return; }
+  const newEv = {
+    id: EVENTS.length + 1,
+    name, type: document.getElementById('new-type').value || 'New Event',
+    date: document.getElementById('new-date').value || 'TBD',
+    venue: document.getElementById('new-venue').value || 'TBD',
+    status: document.getElementById('new-status').value || 'draft',
+    docs: 0,
+    running_order: [], vips: [], sources: [],
+    seating: { rows:[] },
+    traffic: { route:['Origin','Destination'], eta_mins:0, distance:'—', convoy_size:0 },
+    ai_context: `You are an AI assistant for ${name}. Help with event planning and operations.`
+  };
+  EVENTS.unshift(newEv);
+  closeCreateModal();
+  renderEvents();
+  showToast('Event "' + name + '" created');
+  ['new-name','new-type','new-date','new-venue','new-notes'].forEach(id => document.getElementById(id).value = '');
+}
+
+// ══════════════════════════════════════════════
+//  TOAST
+// ══════════════════════════════════════════════
+function showToast(msg) {
+  document.getElementById('toast-msg').textContent = msg;
+  const t = document.getElementById('toast');
+  t.classList.add('show');
+  setTimeout(()=> t.classList.remove('show'), 2800);
+}
+
+// ══════════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════════
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeCreateModal();
+});
+</script>
+</body>
+</html>
