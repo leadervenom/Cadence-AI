@@ -1,99 +1,567 @@
-# Cadence Frontend
+# Cadence AI Event Management System
 
-Vue 3 + Vite single-page app for Cadence Operations. This is a **standalone
-project** with its own `package.json` and `node_modules`, separate from the
-backend in `/src` (the Express API). Run them as two independent processes,
-on two different ports, during development.
+An AI-assisted event management system designed to manage protocol events, VIP hierarchy, seating arrangements, running orders, traffic flow, and event operations.
 
-## Setup
+---
+
+# Project Structure
+
+```text
+Cadence/
+
+├── frontend/
+│   └── index.html
+
+├── src/
+│   ├── server.js
+│
+│   ├── routes/
+│   │   ├── authRoutes.js
+│   │   ├── eventRoutes.js
+│   │   ├── vipRoutes.js
+│   │   ├── aiRoutes.js
+│   │   └── seatingRoutes.js
+│
+│   ├── controllers/
+│   │   ├── AuthController.js
+│   │   ├── EventController.js
+│   │   ├── VIPController.js
+│   │   ├── AIController.js
+│   │   └── SeatingController.js
+│
+│   ├── repositories/
+│   │   ├── EventRepository.js
+│   │   ├── VIPProfileRepository.js
+│   │   ├── EventExtractionRepository.js
+│   │   └── SeatingRepository.js
+│
+│   └── database/
+│       └── db.js
+```
+
+---
+
+# Module to Frontend Mapping
+
+<table style="border-collapse: collapse; width:100%;">
+
+<tr>
+
+<th style="border:1px solid black; padding:8px;">
+Sprint
+</th>
+
+<th style="border:1px solid black; padding:8px;">
+Module
+</th>
+
+<th style="border:1px solid black; padding:8px;">
+Frontend
+</th>
+
+<th style="border:1px solid black; padding:8px;">
+Backend
+</th>
+
+<th style="border:1px solid black; padding:8px;">
+Database
+</th>
+
+</tr>
+
+
+<tr>
+
+<td style="border:1px solid black; padding:8px;">
+1
+</td>
+
+<td style="border:1px solid black; padding:8px;">
+User Authentication
+</td>
+
+<td style="border:1px solid black; padding:8px;">
+
+<ul>
+
+<li>
+
+<a href="frontend/index.html">
+
+Login Page
+
+</a>
+
+</li>
+
+</ul>
+
+</td>
+
+<td style="border:1px solid black; padding:8px;">
+
+<ul>
+
+<li>
+
+<a href="src/controllers/AuthController.js">
+
+AuthController.js
+
+</a>
+
+</li>
+
+<li>
+
+<a href="src/routes/authRoutes.js">
+
+authRoutes.js
+
+</a>
+
+</li>
+
+</ul>
+
+</td>
+
+<td style="border:1px solid black; padding:8px;">
+
+User Table
+
+</td>
+
+</tr>
+
+
+
+<tr>
+
+<td style="border:1px solid black; padding:8px;">
+1
+</td>
+
+<td style="border:1px solid black; padding:8px;">
+Event Management
+</td>
+
+<td style="border:1px solid black; padding:8px;">
+
+<ul>
+
+<li>
+
+<a href="frontend/index.html">
+
+Events Module
+
+</a>
+
+</li>
+
+</ul>
+
+</td>
+
+<td style="border:1px solid black; padding:8px;">
+
+<ul>
+
+<li>
+
+<a href="src/controllers/EventController.js">
+
+EventController.js
+
+</a>
+
+</li>
+
+<li>
+
+<a href="src/routes/eventRoutes.js">
+
+eventRoutes.js
+
+</a>
+
+</li>
+
+<li>
+
+<a href="src/repositories/EventRepository.js">
+
+EventRepository.js
+
+</a>
+
+</li>
+
+</ul>
+
+</td>
+
+<td style="border:1px solid black; padding:8px;">
+
+events
+
+</td>
+
+</tr>
+
+
+
+<tr>
+
+<td style="border:1px solid black; padding:8px;">
+2
+</td>
+
+<td style="border:1px solid black; padding:8px;">
+VIP Management
+</td>
+
+<td style="border:1px solid black; padding:8px;">
+
+<ul>
+
+<li>
+
+<a href="frontend/index.html">
+
+VIP Module
+
+</a>
+
+</li>
+
+</ul>
+
+</td>
+
+<td style="border:1px solid black; padding:8px;">
+
+<ul>
+
+<li>
+
+<a href="src/controllers/VIPController.js">
+
+VIPController.js
+
+</a>
+
+</li>
+
+<li>
+
+<a href="src/routes/vipRoutes.js">
+
+vipRoutes.js
+
+</a>
+
+</li>
+
+<li>
+
+<a href="src/repositories/VIPProfileRepository.js">
+
+VIPProfileRepository.js
+
+</a>
+
+</li>
+
+</ul>
+
+</td>
+
+<td style="border:1px solid black; padding:8px;">
+
+vip_profiles
+
+</td>
+
+</tr>
+
+
+
+<tr>
+
+<td style="border:1px solid black; padding:8px;">
+2
+</td>
+
+<td style="border:1px solid black; padding:8px;">
+Seating Arrangement
+</td>
+
+<td style="border:1px solid black; padding:8px;">
+
+<ul>
+
+<li>
+
+<a href="frontend/index.html">
+
+Seating Layout
+
+</a>
+
+</li>
+
+</ul>
+
+</td>
+
+<td style="border:1px solid black; padding:8px;">
+
+<ul>
+
+<li>
+
+<a href="src/controllers/SeatingController.js">
+
+SeatingController.js
+
+</a>
+
+</li>
+
+<li>
+
+<a href="src/routes/seatingRoutes.js">
+
+seatingRoutes.js
+
+</a>
+
+</li>
+
+<li>
+
+<a href="src/repositories/SeatingRepository.js">
+
+SeatingRepository.js
+
+</a>
+
+</li>
+
+</ul>
+
+</td>
+
+<td style="border:1px solid black; padding:8px;">
+
+seating_tables
+
+</td>
+
+</tr>
+
+
+
+<tr>
+
+<td style="border:1px solid black; padding:8px;">
+3
+</td>
+
+<td style="border:1px solid black; padding:8px;">
+Running Order
+</td>
+
+<td style="border:1px solid black; padding:8px;">
+
+<ul>
+
+<li>
+
+<a href="frontend/index.html">
+
+Running Order Module
+
+</a>
+
+</li>
+
+</ul>
+
+</td>
+
+<td style="border:1px solid black; padding:8px;">
+
+<ul>
+
+<li>
+
+<a href="src/controllers/EventController.js">
+
+EventController.js
+
+</a>
+
+</li>
+
+</ul>
+
+</td>
+
+<td style="border:1px solid black; padding:8px;">
+
+running_orders
+
+</td>
+
+</tr>
+
+
+
+<tr>
+
+<td style="border:1px solid black; padding:8px;">
+3
+</td>
+
+<td style="border:1px solid black; padding:8px;">
+AI Event Extraction
+</td>
+
+<td style="border:1px solid black; padding:8px;">
+
+<ul>
+
+<li>
+
+<a href="frontend/index.html">
+
+AI Workspace
+
+</a>
+
+</li>
+
+</ul>
+
+</td>
+
+<td style="border:1px solid black; padding:8px;">
+
+<ul>
+
+<li>
+
+<a href="src/controllers/AIController.js">
+
+AIController.js
+
+</a>
+
+</li>
+
+<li>
+
+<a href="src/routes/aiRoutes.js">
+
+aiRoutes.js
+
+</a>
+
+</li>
+
+<li>
+
+<a href="src/repositories/EventExtractionRepository.js">
+
+EventExtractionRepository.js
+
+</a>
+
+</li>
+
+</ul>
+
+</td>
+
+<td style="border:1px solid black; padding:8px;">
+
+event_extractions
+
+</td>
+
+</tr>
+
+</table>
+
+---
+
+# Technology Stack
+
+### Frontend
+
+- HTML5
+- CSS3
+- Vanilla JavaScript
+
+### Backend
+
+- Node.js
+- Express.js
+
+### Database
+
+- PostgreSQL
+
+### AI Module
+
+- AI Event Extraction Engine
+- Event Information Parser
+- Seating Recommendation Logic
+
+---
+
+# Features
+
+- User Login and Authentication
+- Event Creation and Management
+- VIP Hierarchy Management
+- Seating Arrangement Generator
+- Running Order Management
+- AI Event Extraction
+- Traffic Flow Planning
+- Emergency Override System
+
+---
+
+# Running The Project
+
+### Install Dependencies
 
 ```bash
-cd frontend
 npm install
-cp .env.example .env
 ```
 
-Edit `.env` and point `VITE_API_BASE_URL` at wherever the backend is running
-(`npm start` from the project root runs the Express server in `/src`,
-default port 3000):
-
-```
-VITE_API_BASE_URL=http://localhost:3000
-VITE_DEV_SERVER_PORT=5173
-```
-
-The backend already enables CORS (see `src/server.js`), so the frontend can
-call it directly with `fetch`/`VITE_API_BASE_URL` — no proxy required. If you
-prefer to avoid CORS entirely, set `VITE_USE_PROXY=true` and the dev server
-will forward `/api/*` to the backend for you.
-
-## Run
+### Start Backend
 
 ```bash
-npm run dev
+node src/server.js
 ```
 
-This starts the Vite dev server on `VITE_DEV_SERVER_PORT` (5173 by default).
-Open it in the browser; it's fully independent of the backend's port.
+### Open Frontend
 
-To build for production:
-
-```bash
-npm run build   # outputs to frontend/dist
-npm run preview # serve the production build locally
+```text
+http://localhost:3000/index.html
 ```
 
-## Project layout
+---
 
-```
-frontend/
-├── index.html              Vite entry HTML
-├── package.json
-├── vite.config.js
-├── .env.example
-└── src/
-    ├── main.js              Mounts the Vue app
-    ├── App.vue              Root component: auth, routing between
-    │                        events list / workspace, modal, toast
-    ├── style.css            Global styles & design tokens (ported 1:1
-    │                        from the original static prototype)
-    ├── data/
-    │   └── events.js        Seed/mock event data
-    ├── services/
-    │   ├── api.js           Wrapper for the backend's /api/* routes
-    │   └── aiChat.js        Direct browser → Anthropic Messages API call
-    │                        used by the AI Assistant tab
-    └── components/
-        ├── AuthScreen.vue
-        ├── TopBar.vue
-        ├── EventsView.vue
-        ├── EventCard.vue
-        ├── CreateEventModal.vue
-        ├── WorkspaceView.vue
-        ├── SourcesPanel.vue
-        ├── RunningOrderTab.vue
-        ├── VipListTab.vue
-        ├── SeatingTab.vue
-        ├── TrafficTab.vue
-        ├── AiChatTab.vue
-        ├── EmergencyBar.vue
-        ├── ModulesPanel.vue
-        └── ToastNotification.vue
-```
+# Authors
 
-## Notes
+**Cadence AI Event Management System**
 
-- The backend's controllers (`src/controllers/*.js`) currently only expose a
-  stub `GET /api/<module>` status route each. `src/services/api.js` already
-  has matching methods (`api.runningOrder.getStatus()`, etc.) — wire up
-  components to call those as real endpoints land, instead of relying on
-  `data/events.js`.
-- The AI Assistant tab calls `https://api.anthropic.com/v1/messages` directly
-  from the browser using `VITE_ANTHROPIC_API_KEY`, matching the original
-  prototype's behavior. That means the key is visible client-side. Before
-  using this with real users, move the call server-side (e.g. flesh out
-  `POST /api/ai` in the backend to hold the key) and call that endpoint from
-  `aiChat.js` instead.
-- `cadence-frontend.html`, the original single-file prototype this app was
-  rebuilt from, is kept out of the build (it's no longer referenced); you can
-  delete it once you've confirmed the Vue version covers everything you need.
+Bachelor of Software Engineering (Honours)
+
+Universiti Teknologi Malaysia
