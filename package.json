@@ -1,0 +1,18 @@
+{
+  "name": "cadence-ai-backend",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "ai": "uvicorn ai_service.main:app --host 0.0.0.0 --port 8000",
+    "db:init": "psql -U postgres -d cadence_ai -f database/01_schema.sql -f database/02_seed_kekananan.sql -f database/04_seed_events.sql"
+  },
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "pg": "^8.21.0"
+  }
+}

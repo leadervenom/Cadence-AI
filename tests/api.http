@@ -1,0 +1,27 @@
+### AI Engine
+
+GET http://localhost:3000/api/ai
+
+
+
+### Dashboard
+
+GET http://localhost:3000/api/dashboard
+
+
+
+### Protocol Hierarchy
+
+GET http://localhost:3000/api/protocol
+
+
+
+### Realtime Operations
+
+GET http://localhost:3000/api/realtime
+
+
+
+### Running Order
+
+GET http://localhost:3000/api/running-order
