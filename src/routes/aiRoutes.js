@@ -15,5 +15,13 @@ router.get(
 
 );
 
+router.post(
+
+    "/chat",
+
+    controller.chat
+
+);
+
 
 export default router;

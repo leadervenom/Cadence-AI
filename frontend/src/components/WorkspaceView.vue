@@ -45,16 +45,53 @@ function switchTab(tab) {
   activeTab.value = tab;
 }
 
-function handleUpload() {
-  const names = ["Protocol_Brief_2026.pdf", "VIP_List_Updated.xlsx", "Floor_Plan_Rev2.pdf"];
-  const name = names[Math.floor(Math.random() * names.length)];
-  const newSource = { name, size: Math.floor(Math.random() * 900 + 50) + "KB", status: "processing", type: "pdf" };
-  props.event.sources.unshift(newSource);
-  emit("toast", "Uploading " + name);
-  setTimeout(() => {
-    newSource.status = "parsed";
-    emit("toast", name + " parsed");
-  }, 2500);
+function fileTypeFor(file) {
+  const ext = file.name.split(".").pop()?.toLowerCase() || "file";
+  if (ext === "doc") return "docx";
+  return ext;
+}
+
+function readableSize(bytes) {
+  if (bytes < 1024) return bytes + " B";
+  if (bytes < 1024 * 1024) return Math.round(bytes / 1024) + " KB";
+  return (bytes / (1024 * 1024)).toFixed(1) + " MB";
+}
+
+function canReadAsText(file) {
+  const ext = fileTypeFor(file);
+  return (
+    file.type.startsWith("text/") ||
+    ["json", "csv", "txt", "md"].includes(ext)
+  );
+}
+
+async function readSourceContent(file) {
+  if (!canReadAsText(file)) return "";
+  const text = await file.text();
+  return text.slice(0, 20000);
+}
+
+async function handleUpload(files = []) {
+  for (const file of files) {
+    const newSource = {
+      name: file.name,
+      size: readableSize(file.size),
+      status: "processing",
+      type: fileTypeFor(file),
+      content: "",
+    };
+    props.event.sources.unshift(newSource);
+    emit("toast", "Uploading " + file.name);
+
+    try {
+      newSource.content = await readSourceContent(file);
+      newSource.status = newSource.content || !canReadAsText(file) ? "parsed" : "uploaded";
+      emit("toast", file.name + (newSource.content ? " parsed" : " uploaded"));
+    } catch (err) {
+      newSource.status = "error";
+      emit("toast", "Could not read " + file.name);
+    }
+  }
 }
 
 function handleBroadcast(msg) {

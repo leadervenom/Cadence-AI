@@ -7,6 +7,7 @@ const props = defineProps({
 const emit = defineEmits(["upload"]);
 
 const activeIndex = ref(0);
+const fileInput = ref(null);
 
 function selectSource(i) {
   activeIndex.value = i;
@@ -15,11 +16,28 @@ function selectSource(i) {
 function iconFor(type) {
   if (type === "pdf") return "ti-file-type-pdf";
   if (type === "docx") return "ti-file-word";
+  if (type === "json") return "ti-file-type-json";
+  if (type === "xlsx" || type === "csv") return "ti-table";
   return "ti-file-spreadsheet";
 }
 
-function simulateUpload() {
-  emit("upload");
+function openFilePicker() {
+  fileInput.value?.click();
+}
+
+function uploadFiles(fileList) {
+  const files = Array.from(fileList || []);
+  if (!files.length) return;
+  emit("upload", files);
+}
+
+function handleFileChange(e) {
+  uploadFiles(e.target.files);
+  e.target.value = "";
+}
+
+function handleDrop(e) {
+  uploadFiles(e.dataTransfer.files);
 }
 </script>
 
@@ -29,10 +47,18 @@ function simulateUpload() {
       <div class="panel-label">Sources</div>
       <div class="panel-count">{{ sources.length }} documents</div>
     </div>
-    <div class="drop-zone" @click="simulateUpload">
+    <input
+      ref="fileInput"
+      class="sr-only-file"
+      type="file"
+      multiple
+      accept=".pdf,.json,.xlsx,.csv,.txt,.md,.doc,.docx"
+      @change="handleFileChange"
+    >
+    <div class="drop-zone" @click="openFilePicker" @dragover.prevent @drop.prevent="handleDrop">
       <i class="ti ti-upload"></i>
       <p>Drop files here or <span>browse</span></p>
-      <div class="file-types">PDF, JSON, XLSX</div>
+      <div class="file-types">PDF, JSON, XLSX, CSV, TXT</div>
     </div>
     <div class="sources-list">
       <div

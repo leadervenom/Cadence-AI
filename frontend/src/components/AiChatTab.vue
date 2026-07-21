@@ -36,6 +36,7 @@ function resetChat() {
 watch(() => props.event?.id, resetChat, { immediate: true });
 
 async function sendMessage(text) {
+  if (isTyping.value) return;
   const trimmed = (text ?? inputText.value).trim();
   if (!trimmed) return;
   inputText.value = "";
@@ -54,7 +55,11 @@ async function sendMessage(text) {
         status: props.event.status,
         running_order: props.event.running_order,
         vips: props.event.vips,
-        sources: props.event.sources.map((s) => s.name),
+        sources: props.event.sources.map((s) => ({
+          name: s.name,
+          status: s.status,
+          content: s.content || "",
+        })),
         traffic: props.event.traffic,
       },
       null,
@@ -129,7 +134,7 @@ defineExpose({ pushEmergencyMessage });
         rows="1"
         @keydown="handleKeydown"
       ></textarea>
-      <button class="btn-send" type="button" @click="sendMessage()">
+      <button class="btn-send" type="button" :disabled="isTyping" @click="sendMessage()">
         <i class="ti ti-send" style="font-size:15px"></i>
       </button>
     </div>
