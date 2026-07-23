@@ -4,11 +4,6 @@
 // This frontend is its own Vite project/port, so every request needs a full
 // base URL rather than a relative path. Set it via frontend/.env:
 //   VITE_API_BASE_URL=http://localhost:3000
-//
-// The backend currently only exposes stub `GET /api/<module>` status routes
-// (see src/routes/*.js + src/controllers/*.js) — getStatus() below talks to
-// those. As real endpoints are added to each controller, add matching
-// methods here rather than scattering fetch() calls through components.
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
 
@@ -18,6 +13,11 @@ async function request(path, options = {}) {
     ...options,
   });
   if (!res.ok) {
+    const contentType = res.headers.get("content-type") || "";
+    if (contentType.includes("application/json")) {
+      const body = await res.json().catch(() => null);
+      throw new Error(body?.error || body?.message || `Request failed: ${res.status}`);
+    }
     const text = await res.text().catch(() => "");
     throw new Error(`API ${path} failed: ${res.status} ${text}`);
   }
@@ -31,17 +31,25 @@ export const api = {
   ai: {
     getStatus: () => request("/api/ai"),
   },
-  dashboard: {
-    getStatus: () => request("/api/dashboard"),
+  vips: {
+    getAll: () => request("/api/vips"),
+    getById: (id) => request(`/api/vips/${encodeURIComponent(id)}`),
+    search: (q) => request(`/api/vips/search?q=${encodeURIComponent(q)}`),
   },
-  protocol: {
-    getStatus: () => request("/api/protocol"),
-  },
-  realtime: {
-    getStatus: () => request("/api/realtime"),
-  },
-  runningOrder: {
-    getStatus: () => request("/api/running-order"),
+  events: {
+    getAll: () => request("/api/events"),
+    getById: (id) => request(`/api/events/${encodeURIComponent(id)}`),
+    create: (payload) =>
+      request("/api/events", {
+        method: "POST",
+        body: JSON.stringify(payload),
+      }),
+    getParticipants: (id) => request(`/api/events/${encodeURIComponent(id)}/participants`),
+    invite: (id, payload) =>
+      request(`/api/events/${encodeURIComponent(id)}/invite`, {
+        method: "POST",
+        body: JSON.stringify(payload),
+      }),
   },
 };
 

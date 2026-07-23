@@ -1,17 +1,19 @@
 <script setup>
 import { nextTick, ref, watch } from "vue";
-import { askCadenceAI } from "../services/aiChat.js";
+import { askCadenceAI, getCadenceChat, saveCadenceChat } from "../services/aiChat.js";
 
 const props = defineProps({
   event: { type: Object, required: true },
   username: { type: String, default: "You" },
 });
+const emit = defineEmits(["event-updated"]);
 
 const messagesEl = ref(null);
 const messages = ref([]); // { role: 'assistant' | 'user', html: string }
 const chatHistory = ref([]); // raw { role, content } sent to the API
 const inputText = ref("");
 const isTyping = ref(false);
+let loadToken = 0;
 
 function scrollToBottom() {
   nextTick(() => {
@@ -19,29 +21,82 @@ function scrollToBottom() {
   });
 }
 
-function addMessage(role, html) {
-  messages.value.push({ role, html });
-  scrollToBottom();
+function escapeHtml(value) {
+  return String(value || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
 }
 
-function resetChat() {
-  chatHistory.value = [];
-  messages.value = [];
+function formatMessage(value) {
+  return escapeHtml(value).replace(/\n/g, "<br>");
+}
+
+function addMessage(role, html, persist = true) {
+  messages.value.push({ role, html });
+  scrollToBottom();
+
+  if (persist) {
+    persistChat();
+  }
+}
+
+function addGreeting() {
   addMessage(
     "assistant",
-    `Cadence AI ready. I have access to all ${props.event.sources.length} documents for <strong>${props.event.name}</strong>. Ask me anything about the running order, VIP protocol, seating, or traffic logistics.`
+    `Cadence AI ready. I have access to all ${props.event.sources.length} documents for <strong>${escapeHtml(props.event.name)}</strong>. Ask me anything about the running order, VIP protocol, or seating.`
   );
 }
 
-watch(() => props.event?.id, resetChat, { immediate: true });
+async function loadChat() {
+  const token = ++loadToken;
+  messages.value = [];
+  chatHistory.value = [];
+
+  try {
+    const chat = await getCadenceChat(props.event.id);
+    if (token !== loadToken) return;
+
+    messages.value = Array.isArray(chat.messages) ? chat.messages : [];
+    chatHistory.value = Array.isArray(chat.chatHistory) ? chat.chatHistory : [];
+
+    if (!messages.value.length) {
+      addGreeting();
+    } else {
+      scrollToBottom();
+    }
+  } catch (err) {
+    if (token !== loadToken) return;
+    addGreeting();
+    addMessage("assistant", formatMessage("Chat history could not be loaded: " + err.message));
+  }
+}
+
+async function persistChat() {
+  if (!props.event?.id) return;
+
+  try {
+    await saveCadenceChat(props.event.id, {
+      messages: messages.value,
+      chatHistory: chatHistory.value,
+    });
+  } catch (err) {
+    console.warn("Could not save AI chat", err);
+  }
+}
+
+watch(() => props.event?.id, loadChat, { immediate: true });
 
 async function sendMessage(text) {
   if (isTyping.value) return;
   const trimmed = (text ?? inputText.value).trim();
   if (!trimmed) return;
   inputText.value = "";
-  addMessage("user", trimmed);
+  addMessage("user", formatMessage(trimmed), false);
   chatHistory.value.push({ role: "user", content: trimmed });
+  persistChat();
 
   isTyping.value = true;
   scrollToBottom();
@@ -49,6 +104,7 @@ async function sendMessage(text) {
   try {
     const eventCtx = JSON.stringify(
       {
+        id: props.event.id,
         name: props.event.name,
         date: props.event.date,
         venue: props.event.venue,
@@ -60,7 +116,6 @@ async function sendMessage(text) {
           status: s.status,
           content: s.content || "",
         })),
-        traffic: props.event.traffic,
       },
       null,
       2
@@ -78,11 +133,26 @@ Be concise, direct, and operational. Use bullet points for lists. Prioritise saf
       { role: "user", content: `[Event context provided via system]\n\n${trimmed}` },
     ];
 
-    const reply = await askCadenceAI({ systemPrompt, messages: apiMessages });
+    const response = await askCadenceAI({
+      systemPrompt,
+      messages: apiMessages,
+      event: props.event,
+    });
+    const reply = response.reply;
+
+    if (response.applied && response.updatedEvent) {
+      emit("event-updated", {
+        event: response.updatedEvent,
+        command: response.command,
+      });
+    }
+
     chatHistory.value.push({ role: "assistant", content: reply });
-    addMessage("assistant", reply.replace(/\n/g, "<br>"));
+    addMessage("assistant", formatMessage(reply), false);
+
+    persistChat();
   } catch (err) {
-    addMessage("assistant", err.message || "Connection error. Please check your network and try again.");
+    addMessage("assistant", formatMessage(err.message || "Connection error. Please check your network and try again."));
   } finally {
     isTyping.value = false;
   }
@@ -95,22 +165,6 @@ function handleKeydown(e) {
   }
 }
 
-// Used by the parent when an emergency broadcast is fired.
-function pushEmergencyMessage(msg) {
-  chatHistory.value.push({ role: "user", content: "[EMERGENCY BROADCAST] " + msg });
-  addMessage("user", "⚠️ " + msg);
-  isTyping.value = true;
-  scrollToBottom();
-  setTimeout(() => {
-    isTyping.value = false;
-    addMessage(
-      "assistant",
-      `<strong>Emergency acknowledged.</strong> Broadcasting: <em>"${msg}"</em><br><br>Recommended actions:<br>• Notify all department heads immediately<br>• Update running order if timing is affected<br>• Confirm with VIP escort team on revised schedule<br>• Update convoy ETA if traffic-related`
-    );
-  }, 1200);
-}
-
-defineExpose({ pushEmergencyMessage });
 </script>
 
 <template>

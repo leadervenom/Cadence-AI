@@ -195,30 +195,34 @@ Cadence/
 - Seating Arrangement Generator
 - Running Order Management
 - AI Event Extraction
-- Traffic Flow Planning
-- Emergency Override System
+- RSVP & Invitations (search participants/VIPs, invite via the organizer's own email, self-service accept/decline)
 
----
 
 # Running The Project
 
-### Install Dependencies
+The backend and frontend are two independent projects, each with their own
+`package.json` — install and run them separately.
+
+### Backend
 
 ```bash
+cd backend
 npm install
-```
-
-### Start Backend
-
-```bash
 node src/server.js
 ```
 
-### Open Frontend
+Runs on `http://localhost:3000` by default (see `backend/.env`).
 
-```text
-http://localhost:3000/index.html
+### Frontend
+
+```bash
+cd frontend
+npm install
+npm run dev
 ```
+
+Runs on `http://localhost:5173` (Vite dev server) and talks to the backend via
+`VITE_API_BASE_URL` in `frontend/.env`.
 
 ---
 
