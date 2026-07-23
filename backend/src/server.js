@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 
+import authRoutes from "./routes/authRoutes.js";
 import aiRoutes from "./routes/aiRoutes.js";
 import vipRoutes from "./routes/vipRoutes.js";
 import eventRoutes from "./routes/eventRoutes.js";
@@ -14,6 +15,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+app.use("/api/auth", authRoutes);
 app.use("/api/ai", aiRoutes);
 app.use("/api/vips", vipRoutes);
 app.use("/api/events", eventRoutes);

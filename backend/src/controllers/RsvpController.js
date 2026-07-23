@@ -1,6 +1,8 @@
 import crypto from "node:crypto";
 import EventParticipantRepository from "../repositories/EventParticipantRepository.js";
 import VIPProfileRepository from "../repositories/VIPProfileRepository.js";
+import EventRepository from "../repositories/EventRepository.js";
+import EmailService from "../services/EmailService.js";
 
 function baseUrl() {
     return process.env.PUBLIC_BASE_URL || `http://localhost:${process.env.PORT || 3000}`;
@@ -33,6 +35,8 @@ class RsvpController {
     constructor() {
         this.participantRepository = new EventParticipantRepository();
         this.vipRepository = new VIPProfileRepository();
+        this.eventRepository = new EventRepository();
+        this.emailService = new EmailService();
     }
 
 
@@ -73,6 +77,12 @@ class RsvpController {
                 return res.status(400).json({ error: "This person has no email on file. Provide one to invite them." });
             }
 
+            const event = await this.eventRepository.getEventById(eventId);
+
+            if (!event) {
+                return res.status(404).json({ error: "Event not found" });
+            }
+
             const token = crypto.randomBytes(24).toString("hex");
 
             const participant = await this.participantRepository.invite({
@@ -82,11 +92,21 @@ class RsvpController {
                 token
             });
 
-            res.status(201).json({
-                participant,
-                acceptUrl: `${baseUrl()}/api/rsvp/${token}/accept`,
-                declineUrl: `${baseUrl()}/api/rsvp/${token}/decline`
-            });
+            const acceptUrl = `${baseUrl()}/api/rsvp/${token}/accept`;
+            const declineUrl = `${baseUrl()}/api/rsvp/${token}/decline`;
+
+            try {
+                await this.emailService.sendRsvpInvite({ event, participant, acceptUrl, declineUrl });
+            }
+            catch (emailError) {
+                console.error(emailError);
+                return res.status(502).json({
+                    error: `Invite was recorded but the email could not be sent: ${emailError.message}`,
+                    participant
+                });
+            }
+
+            res.status(201).json({ participant });
         }
         catch (error) {
             console.error(error);
