@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch } from "vue";
+import { onMounted, ref, watch } from "vue";
 import AuthScreen from "./components/AuthScreen.vue";
 import TopBar from "./components/TopBar.vue";
 import EventsView from "./components/EventsView.vue";
@@ -7,11 +7,13 @@ import WorkspaceView from "./components/WorkspaceView.vue";
 import CreateEventModal from "./components/CreateEventModal.vue";
 import ToastNotification from "./components/ToastNotification.vue";
 import api from "./services/api.js";
+import { isAuthed, logout as clearSession } from "./services/authStore.js";
 
 const currentUser = ref(null);
 const events = ref([]);
 const currentEvent = ref(null);
 const modalOpen = ref(false);
+const restoringSession = ref(true);
 
 async function loadEvents() {
   try {
@@ -20,6 +22,17 @@ async function loadEvents() {
     showToast("Could not load events from the server");
   }
 }
+
+onMounted(async () => {
+  if (isAuthed()) {
+    try {
+      currentUser.value = await api.auth.me();
+    } catch (err) {
+      clearSession();
+    }
+  }
+  restoringSession.value = false;
+});
 
 watch(currentUser, (user) => {
   if (user) loadEvents();
@@ -48,6 +61,7 @@ function handleLoginError(msg) {
 }
 
 function handleLogout() {
+  clearSession();
   currentUser.value = null;
   currentEvent.value = null;
 }
@@ -136,12 +150,13 @@ function handleEventUpdated(update) {
 
 
 <template>
+  <div v-if="restoringSession"></div>
+
   <AuthScreen
-    v-if="!currentUser"
+    v-else-if="!currentUser"
     @login="handleLogin"
     @login-error="handleLoginError"
   />
-
 
   <div v-else id="app-shell" class="active">
 
@@ -166,7 +181,7 @@ function handleEventUpdated(update) {
       <WorkspaceView
         v-else
         :event="currentEvent"
-        :username="currentUser.username"
+        :username="currentUser.fullName"
         @toast="showToast"
         @event-updated="handleEventUpdated"
       />

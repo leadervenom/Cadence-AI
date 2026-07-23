@@ -5,11 +5,19 @@
 // base URL rather than a relative path. Set it via frontend/.env:
 //   VITE_API_BASE_URL=http://localhost:3000
 
+import { getToken } from "./authStore.js";
+
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
 
 async function request(path, options = {}) {
+  const token = getToken();
+
   const res = await fetch(`${BASE_URL}${path}`, {
-    headers: { "Content-Type": "application/json", ...(options.headers || {}) },
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...(options.headers || {}),
+    },
     ...options,
   });
   if (!res.ok) {
@@ -28,6 +36,19 @@ async function request(path, options = {}) {
 export const api = {
   baseUrl: BASE_URL,
 
+  auth: {
+    register: (payload) =>
+      request("/api/auth/register", {
+        method: "POST",
+        body: JSON.stringify(payload),
+      }),
+    login: (email, password) =>
+      request("/api/auth/login", {
+        method: "POST",
+        body: JSON.stringify({ email, password }),
+      }),
+    me: () => request("/api/auth/me"),
+  },
   ai: {
     getStatus: () => request("/api/ai"),
   },

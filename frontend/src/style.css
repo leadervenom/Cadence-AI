@@ -103,6 +103,11 @@ body {
 .btn-primary:hover { opacity: 0.9; }
 .btn-primary:active { transform: scale(0.98); }
 .auth-footer { text-align: center; margin-top: 20px; font-size: 11px; color: var(--text-muted); letter-spacing: 1px; }
+.link-btn {
+  width: 100%; background: none; border: none; color: var(--accent-blue);
+  font-size: 12px; cursor: pointer; margin-top: 12px; padding: 4px; font-family: var(--font);
+}
+.link-btn:hover { text-decoration: underline; }
 
 /* ── TOPBAR ── */
 #topbar {

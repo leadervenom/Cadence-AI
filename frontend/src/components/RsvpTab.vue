@@ -14,6 +14,7 @@ const participants = ref([]);
 const loadingParticipants = ref(false);
 const pendingEmailFor = ref(null);
 const emailInput = ref("");
+const invitingVipId = ref(null);
 let searchTimer = null;
 
 async function loadParticipants() {
@@ -64,43 +65,24 @@ function capitalize(s) {
   return (s || "").charAt(0).toUpperCase() + (s || "").slice(1);
 }
 
-function openMailto(participant, acceptUrl, declineUrl) {
-  const subject = `Invitation: ${props.event.name}`;
-  const details = [
-    props.event.date ? `Date: ${props.event.date}` : null,
-    props.event.venue ? `Venue: ${props.event.venue}` : null,
-  ].filter(Boolean).join("\n");
-
-  const body =
-    `Dear ${participant.full_name},\n\n` +
-    `You are invited to ${props.event.name}.\n` +
-    (details ? `${details}\n\n` : "\n") +
-    `Please confirm your attendance using one of the links below:\n\n` +
-    `Accept: ${acceptUrl}\n` +
-    `Decline: ${declineUrl}\n\n` +
-    `Regards,\nCadence AI Event Operations`;
-
-  const link = document.createElement("a");
-  link.href = `mailto:${encodeURIComponent(participant.email)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-  link.click();
-}
-
 async function sendInvite(vip, email = null) {
+  invitingVipId.value = vip.vip_id;
+
   try {
-    const { participant, acceptUrl, declineUrl } = await api.events.invite(props.event.id, {
+    const { participant } = await api.events.invite(props.event.id, {
       vipId: vip.vip_id,
       role: vip.position_title,
       email,
     });
 
-    openMailto(participant, acceptUrl, declineUrl);
-
-    emit("toast", `Invite drafted for ${participant.full_name}`);
+    emit("toast", `Invite emailed to ${participant.full_name}`);
     pendingEmailFor.value = null;
     emailInput.value = "";
     await loadParticipants();
   } catch (err) {
     emit("toast", err.message || "Could not invite participant");
+  } finally {
+    invitingVipId.value = null;
   }
 }
 
@@ -145,9 +127,13 @@ function confirmEmailAndInvite(vip) {
 
         <div v-if="pendingEmailFor === vip.vip_id" class="rsvp-email-prompt">
           <input type="email" v-model="emailInput" placeholder="Enter their email…" class="form-input">
-          <button class="btn-primary" type="button" @click="confirmEmailAndInvite(vip)">Send</button>
+          <button class="btn-primary" type="button" :disabled="invitingVipId === vip.vip_id" @click="confirmEmailAndInvite(vip)">
+            {{ invitingVipId === vip.vip_id ? "Sending…" : "Send" }}
+          </button>
         </div>
-        <button v-else class="btn-primary" type="button" @click="handleInviteClick(vip)">Invite</button>
+        <button v-else class="btn-primary" type="button" :disabled="invitingVipId === vip.vip_id" @click="handleInviteClick(vip)">
+          {{ invitingVipId === vip.vip_id ? "Sending…" : "Invite" }}
+        </button>
       </div>
     </div>
 

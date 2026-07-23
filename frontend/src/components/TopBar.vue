@@ -4,6 +4,13 @@ defineProps({
   currentEvent: { type: Object, default: null },
 });
 defineEmits(["logout", "back"]);
+
+function formatRole(role) {
+  return (role || "")
+    .split("_")
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(" ");
+}
 </script>
 
 <template>
@@ -30,7 +37,7 @@ defineEmits(["logout", "back"]);
       <div class="conn-badge" :style="{ display: currentEvent?.status === 'live' ? 'flex' : 'none' }">
         <span class="conn-dot"></span> CONNECTED
       </div>
-      <span class="topbar-role">{{ currentUser ? `${currentUser.username} · ${currentUser.role}` : "" }}</span>
+      <span class="topbar-role">{{ currentUser ? `${currentUser.fullName} · ${formatRole(currentUser.role)}` : "" }}</span>
       <button class="btn-icon" type="button" @click="$emit('logout')">
         <i class="ti ti-logout" style="font-size:14px"></i> Sign out
       </button>
