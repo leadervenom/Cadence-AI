@@ -180,7 +180,7 @@ Cadence/
 - PostgreSQL
 
 ### AI Module
-
+- AI MODEL: Gemini 2.5 Flash Lite
 - AI Event Extraction Engine
 - Event Information Parser
 - Seating Recommendation Logic
@@ -195,34 +195,40 @@ Cadence/
 - Seating Arrangement Generator
 - Running Order Management
 - AI Event Extraction
-- RSVP & Invitations (search participants/VIPs, invite via the organizer's own email, self-service accept/decline)
+- Traffic Flow Planning
+- Emergency Override System
 
+---
+# to be removed features
+- traffic flow planning
+- emergency override system
+- 
+
+---
+
+# New features
+- A simple way for the Event Organizer and the admin to send RSVP to participants through email with one click and participant details but they will be using the interface and their own email they used to login to send those messages (A search function is a must)
+- For the Seating Arrangement Generator the stakeholders asked for different layouts of the same event on different spots such as the stage, dinner table, food arrangement on the venue and etc layouts for them to add and create theirself 
 
 # Running The Project
 
-The backend and frontend are two independent projects, each with their own
-`package.json` — install and run them separately.
-
-### Backend
+### Install Dependencies
 
 ```bash
-cd backend
 npm install
+```
+
+### Start Backend
+
+```bash
 node src/server.js
 ```
 
-Runs on `http://localhost:3000` by default (see `backend/.env`).
+### Open Frontend
 
-### Frontend
-
-```bash
-cd frontend
-npm install
-npm run dev
+```text
+http://localhost:3000/index.html
 ```
-
-Runs on `http://localhost:5173` (Vite dev server) and talks to the backend via
-`VITE_API_BASE_URL` in `frontend/.env`.
 
 ---
 
