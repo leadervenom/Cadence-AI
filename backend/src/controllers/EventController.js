@@ -55,7 +55,7 @@ class EventController {
                 running_order: [],
                 vips: [],
                 sources: [],
-                seating: { rows: [] },
+                seating: { layouts: [], activeLayoutId: null },
                 ai_context: `You are an AI assistant for ${created.name}. Help with event planning and operations.`
             });
 

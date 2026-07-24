@@ -6,11 +6,11 @@ const props = defineProps({
 const emit = defineEmits(["select"]);
 
 const modules = [
-  { id: "running-order", icon: "ti-timeline", title: "Running Order", sub: "Timeline & schedule cues" },
   { id: "vip-list", icon: "ti-users", title: "VIP Management", sub: "Guest list & protocol" },
-  { id: "seating", icon: "ti-layout-rows", title: "Seating Layout", sub: "Floor plan & assignments" },
+  { id: "seating", icon: "ti-layout-rows", title: "Layouts", sub: "Floor plans & seat assignments" },
   { id: "rsvp", icon: "ti-mail", title: "RSVP & Invitations", sub: "Invite & track attendance" },
   { id: "ai-chat", icon: "ti-sparkles", title: "AI Assistant", sub: "Event intelligence" },
+  { id: "running-order", icon: "ti-timeline", title: "Running Order", sub: "Timeline & schedule cues" },
 ];
 
 function capitalize(s) {

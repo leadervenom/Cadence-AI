@@ -11,7 +11,7 @@ const EVENT_SELECT = `
     COALESCE(event_data->'running_order', '[]'::jsonb) AS running_order,
     COALESCE(event_data->'vips', '[]'::jsonb) AS vips,
     COALESCE(event_data->'sources', '[]'::jsonb) AS sources,
-    COALESCE(event_data->'seating', '{"rows":[]}'::jsonb) AS seating,
+    COALESCE(event_data->'seating', '{"layouts":[],"activeLayoutId":null}'::jsonb) AS seating,
     event_data->>'ai_context' AS ai_context
 `;
 

@@ -1,5 +1,8 @@
 <script setup>
-import { computed, ref } from "vue";
+import { computed, nextTick, ref } from "vue";
+import * as pdfjsLib from "pdfjs-dist";
+import pdfjsWorkerUrl from "pdfjs-dist/build/pdf.worker.mjs?url";
+import mammoth from "mammoth";
 import SourcesPanel from "./SourcesPanel.vue";
 import RunningOrderTab from "./RunningOrderTab.vue";
 import VipListTab from "./VipListTab.vue";
@@ -8,18 +11,25 @@ import RsvpTab from "./RsvpTab.vue";
 import AiChatTab from "./AiChatTab.vue";
 import ModulesPanel from "./ModulesPanel.vue";
 
+pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorkerUrl;
+
+const MAX_CONTENT_CHARS = 20000;
+const GENERATE_RUNNING_ORDER_PROMPT =
+  "Read all parsed source documents in context and generate a complete running order for this event from their content. " +
+  "Use operation \"replace\" on the running_order section with a properly ordered, properly shaped array.";
+
 const props = defineProps({
   event: { type: Object, required: true },
   username: { type: String, default: "You" },
 });
 const emit = defineEmits(["toast", "event-updated"]);
 
-const activeTab = ref("running-order");
+const activeTab = ref("vip-list");
+const aiChatRef = ref(null);
 
 const tabs = [
-  { id: "running-order", icon: "ti-timeline", label: "Running Order" },
   { id: "vip-list", icon: "ti-users", label: "VIP List" },
-  { id: "seating", icon: "ti-layout-rows", label: "Seating" },
+  { id: "seating", icon: "ti-layout-rows", label: "Layouts" },
   { id: "rsvp", icon: "ti-mail", label: "RSVP" },
   { id: "ai-chat", icon: "ti-sparkles", label: "AI Assistant" },
 ];
@@ -27,7 +37,7 @@ const tabs = [
 const headerLabels = {
   "running-order": { title: "Running Order Timeline", sub: () => "Live event schedule — " + props.event.name },
   "vip-list": { title: "VIP Management", sub: () => "Guest list & protocol hierarchy" },
-  seating: { title: "Seating Layout", sub: () => "Floor plan & seat assignments" },
+  seating: { title: "Layouts", sub: () => "Floor plans & seat assignments" },
   rsvp: { title: "RSVP & Invitations", sub: () => "Search, invite, and track attendance" },
   "ai-chat": { title: "AI Assistant", sub: () => "Event intelligence powered by Gemini" },
 };
@@ -51,18 +61,43 @@ function readableSize(bytes) {
   return (bytes / (1024 * 1024)).toFixed(1) + " MB";
 }
 
-function canReadAsText(file) {
+function isPlainText(file) {
   const ext = fileTypeFor(file);
-  return (
-    file.type.startsWith("text/") ||
-    ["json", "csv", "txt", "md"].includes(ext)
-  );
+  return file.type.startsWith("text/") || ["json", "csv", "txt", "md"].includes(ext);
+}
+
+async function extractPdfText(file) {
+  const buffer = await file.arrayBuffer();
+  const pdf = await pdfjsLib.getDocument({ data: buffer }).promise;
+  let text = "";
+
+  for (let pageNum = 1; pageNum <= pdf.numPages && text.length < MAX_CONTENT_CHARS; pageNum++) {
+    const page = await pdf.getPage(pageNum);
+    const content = await page.getTextContent();
+    text += content.items.map((item) => item.str || "").join(" ") + "\n";
+  }
+
+  return text.slice(0, MAX_CONTENT_CHARS);
+}
+
+async function extractDocxText(file) {
+  const buffer = await file.arrayBuffer();
+  const result = await mammoth.extractRawText({ arrayBuffer: buffer });
+  return (result.value || "").slice(0, MAX_CONTENT_CHARS);
 }
 
 async function readSourceContent(file) {
-  if (!canReadAsText(file)) return "";
-  const text = await file.text();
-  return text.slice(0, 20000);
+  const ext = fileTypeFor(file);
+
+  if (ext === "pdf") return extractPdfText(file);
+  if (ext === "docx") return extractDocxText(file);
+
+  if (isPlainText(file)) {
+    const text = await file.text();
+    return text.slice(0, MAX_CONTENT_CHARS);
+  }
+
+  return "";
 }
 
 async function handleUpload(files = []) {
@@ -79,13 +114,18 @@ async function handleUpload(files = []) {
 
     try {
       newSource.content = await readSourceContent(file);
-      newSource.status = newSource.content || !canReadAsText(file) ? "parsed" : "uploaded";
+      newSource.status = newSource.content ? "parsed" : "uploaded";
       emit("toast", file.name + (newSource.content ? " parsed" : " uploaded"));
     } catch (err) {
       newSource.status = "error";
       emit("toast", "Could not read " + file.name);
     }
   }
+}
+
+function handleGenerateRunningOrder() {
+  switchTab("ai-chat");
+  nextTick(() => aiChatRef.value?.sendMessage(GENERATE_RUNNING_ORDER_PROMPT));
 }
 
 function tabForSection(section) {
@@ -136,7 +176,7 @@ function handleEventUpdated(update) {
       </div>
 
       <div class="module-content" :class="{ active: activeTab === 'running-order' }">
-        <RunningOrderTab :rows="event.running_order" />
+        <RunningOrderTab :rows="event.running_order" :sources="event.sources" @generate="handleGenerateRunningOrder" />
       </div>
 
       <div class="module-content" :class="{ active: activeTab === 'vip-list' }">
@@ -153,6 +193,7 @@ function handleEventUpdated(update) {
 
       <div class="module-content" :class="{ 'chat-active': activeTab === 'ai-chat', active: activeTab === 'ai-chat' }">
         <AiChatTab
+          ref="aiChatRef"
           :event="event"
           :username="username"
           @event-updated="handleEventUpdated"

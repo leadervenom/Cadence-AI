@@ -323,6 +323,13 @@ body {
 .module-content.chat-active { display: flex; flex-direction: column; overflow: hidden; height: calc(100% - 0px); }
 
 /* Running Order Table */
+.ro-tab { display: flex; flex-direction: column; gap: 14px; }
+.ro-tab-header { display: flex; justify-content: flex-end; }
+.ro-tab-header .btn-primary {
+  width: auto; margin-top: 0; padding: 8px 16px;
+  display: flex; align-items: center; gap: 7px; white-space: nowrap;
+}
+.ro-tab-header .btn-primary:disabled { opacity: 0.45; cursor: not-allowed; }
 .ro-table { width: 100%; border-collapse: collapse; }
 .ro-table th {
   text-align: left; font-size: 11px; font-weight: 600; letter-spacing: 0.5px;
@@ -387,7 +394,21 @@ body {
   width: auto; flex-shrink: 0; margin-top: 0; padding: 8px 16px; white-space: nowrap;
 }
 
-/* Seating Layout */
+/* Layouts */
+.layouts-tab { display: flex; flex-direction: column; gap: 14px; }
+.layout-switcher { display: flex; gap: 6px; flex-wrap: wrap; }
+.layout-switch-btn {
+  padding: 6px 14px; font-size: 12px; font-weight: 500;
+  color: var(--text-secondary); background: var(--bg-card);
+  border: 1px solid var(--border); border-radius: 20px;
+  cursor: pointer; font-family: var(--font);
+  transition: color 0.12s, border-color 0.12s, background 0.12s;
+}
+.layout-switch-btn:hover { color: var(--text-primary); }
+.layout-switch-btn.active {
+  color: var(--accent-blue); border-color: rgba(59,130,246,0.4);
+  background: var(--accent-blue-dim);
+}
 .seating-canvas {
   background: var(--bg-card); border: 1px solid var(--border);
   border-radius: var(--radius-lg); padding: 20px;

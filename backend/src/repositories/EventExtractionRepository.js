@@ -74,7 +74,7 @@ class EventExtractionRepository {
             [
                 eventId,
                 extractionType,
-                extractedData,
+                JSON.stringify(extractedData),
                 confidenceScore,
                 validationStatus
             ]

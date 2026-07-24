@@ -111,6 +111,7 @@ async function sendMessage(text) {
         status: props.event.status,
         running_order: props.event.running_order,
         vips: props.event.vips,
+        seating: props.event.seating,
         sources: props.event.sources.map((s) => ({
           name: s.name,
           status: s.status,
@@ -164,6 +165,8 @@ function handleKeydown(e) {
     sendMessage();
   }
 }
+
+defineExpose({ sendMessage });
 
 </script>
 
