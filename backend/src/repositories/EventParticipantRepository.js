@@ -106,6 +106,95 @@ class EventParticipantRepository {
 
     }
 
+
+    async updateStatus(eventVipId, status) {
+
+        await pool.query(
+            `UPDATE event_vips
+             SET attendance_status = $2, responded_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP
+             WHERE event_vip_id = $1;`,
+            [eventVipId, status]
+        );
+
+        const updated = await pool.query(
+            `SELECT ${PARTICIPANT_SELECT} FROM event_vips ev
+             JOIN vip_profiles vp ON vp.vip_id = ev.vip_id
+             WHERE ev.event_vip_id = $1;`,
+            [eventVipId]
+        );
+
+        return updated.rows[0];
+
+    }
+
+
+    async updateDetails(eventVipId, fields) {
+
+        const columnByField = {
+            eventRole: "event_role",
+            plusOneName: "plus_one_name",
+            arrivalTime: "arrival_time",
+            departureTime: "departure_time",
+            specialNotes: "special_notes",
+            eventRankOverride: "event_rank_override"
+        };
+
+        const sets = [];
+        const values = [];
+
+        for (const [field, column] of Object.entries(columnByField)) {
+            if (Object.prototype.hasOwnProperty.call(fields, field)) {
+                values.push(fields[field]);
+                sets.push(`${column} = $${values.length}`);
+            }
+        }
+
+        if (sets.length === 0) {
+            const existing = await pool.query(
+                `SELECT ${PARTICIPANT_SELECT} FROM event_vips ev
+                 JOIN vip_profiles vp ON vp.vip_id = ev.vip_id
+                 WHERE ev.event_vip_id = $1;`,
+                [eventVipId]
+            );
+
+            return existing.rows[0];
+        }
+
+        values.push(eventVipId);
+
+        await pool.query(
+            `UPDATE event_vips
+             SET ${sets.join(", ")}, updated_at = CURRENT_TIMESTAMP
+             WHERE event_vip_id = $${values.length};`,
+            values
+        );
+
+        const updated = await pool.query(
+            `SELECT ${PARTICIPANT_SELECT} FROM event_vips ev
+             JOIN vip_profiles vp ON vp.vip_id = ev.vip_id
+             WHERE ev.event_vip_id = $1;`,
+            [eventVipId]
+        );
+
+        return updated.rows[0];
+
+    }
+
+
+    async uninvite(eventVipId) {
+
+        const query = `
+            DELETE FROM event_vips
+            WHERE event_vip_id = $1
+            RETURNING event_vip_id;
+        `;
+
+        const result = await pool.query(query, [eventVipId]);
+
+        return result.rows[0];
+
+    }
+
 }
 
 export default EventParticipantRepository;

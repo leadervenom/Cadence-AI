@@ -139,7 +139,7 @@ function confirmEmailAndInvite(vip) {
 
     <div class="rsvp-participants">
       <div class="panel-label">Registered Participants</div>
-      <div v-if="loadingParticipants" class="rsvp-empty">Loading…</div>
+      <div v-if="loadingParticipants" class="rsvp-empty"><span class="spinner"></span>Loading participants…</div>
       <div v-else-if="!participants.length" class="rsvp-empty">No one invited yet — search above to invite participants or VIPs.</div>
 
       <div v-for="p in participants" :key="p.event_vip_id" class="vip-card">

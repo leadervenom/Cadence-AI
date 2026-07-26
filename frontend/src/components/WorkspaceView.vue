@@ -66,7 +66,7 @@ function isPlainText(file) {
   return file.type.startsWith("text/") || ["json", "csv", "txt", "md"].includes(ext);
 }
 
-async function extractPdfText(file) {
+async function extractPdfText(file, onProgress) {
   const buffer = await file.arrayBuffer();
   const pdf = await pdfjsLib.getDocument({ data: buffer }).promise;
   let text = "";
@@ -75,6 +75,7 @@ async function extractPdfText(file) {
     const page = await pdf.getPage(pageNum);
     const content = await page.getTextContent();
     text += content.items.map((item) => item.str || "").join(" ") + "\n";
+    onProgress?.(Math.round((pageNum / pdf.numPages) * 100));
   }
 
   return text.slice(0, MAX_CONTENT_CHARS);
@@ -86,10 +87,10 @@ async function extractDocxText(file) {
   return (result.value || "").slice(0, MAX_CONTENT_CHARS);
 }
 
-async function readSourceContent(file) {
+async function readSourceContent(file, onProgress) {
   const ext = fileTypeFor(file);
 
-  if (ext === "pdf") return extractPdfText(file);
+  if (ext === "pdf") return extractPdfText(file, onProgress);
   if (ext === "docx") return extractDocxText(file);
 
   if (isPlainText(file)) {
@@ -102,18 +103,22 @@ async function readSourceContent(file) {
 
 async function handleUpload(files = []) {
   for (const file of files) {
+    const ext = fileTypeFor(file);
     const newSource = {
       name: file.name,
       size: readableSize(file.size),
       status: "processing",
-      type: fileTypeFor(file),
+      type: ext,
       content: "",
+      // Only PDFs report real per-page progress; other formats parse in one shot
+      // so we show an indeterminate animation instead of a fabricated percentage.
+      progress: ext === "pdf" ? 0 : null,
     };
     props.event.sources.unshift(newSource);
     emit("toast", "Uploading " + file.name);
 
     try {
-      newSource.content = await readSourceContent(file);
+      newSource.content = await readSourceContent(file, (pct) => { newSource.progress = pct; });
       newSource.status = newSource.content ? "parsed" : "uploaded";
       emit("toast", file.name + (newSource.content ? " parsed" : " uploaded"));
     } catch (err) {
@@ -128,19 +133,18 @@ function handleGenerateRunningOrder() {
   nextTick(() => aiChatRef.value?.sendMessage(GENERATE_RUNNING_ORDER_PROMPT));
 }
 
-function tabForSection(section) {
-  const sectionTabs = {
-    running_order:"running-order",
-    vips:"vip-list",
-    seating:"seating",
-  };
+function tabForTool(toolName) {
+  if (!toolName) return "";
+  if (toolName.includes("running_order")) return "running-order";
+  if (toolName.includes("event_vip")) return "vip-list";
+  if (toolName.includes("seating")) return "seating";
 
-  return sectionTabs[section];
+  return "";
 }
 
 function handleEventUpdated(update) {
   const updatedEvent = update?.event || update;
-  const targetTab = tabForSection(update?.command?.target?.section);
+  const targetTab = tabForTool(update?.command?.name);
 
   emit("event-updated", updatedEvent);
   emit("toast", "Event updated from AI command");

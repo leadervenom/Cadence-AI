@@ -51,6 +51,17 @@ export const api = {
   },
   ai: {
     getStatus: () => request("/api/ai"),
+    chat: (payload) =>
+      request("/api/ai/chat", {
+        method: "POST",
+        body: JSON.stringify(payload),
+      }),
+    getChat: (eventId) => request(`/api/ai/chats/${encodeURIComponent(eventId)}`),
+    saveChat: (eventId, chat) =>
+      request(`/api/ai/chats/${encodeURIComponent(eventId)}`, {
+        method: "PUT",
+        body: JSON.stringify(chat),
+      }),
   },
   vips: {
     getAll: () => request("/api/vips"),

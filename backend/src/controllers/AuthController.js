@@ -29,92 +29,74 @@ class AuthController {
 
 
     register = async (req, res) => {
-        try {
-            const { fullName, email, password, role } = req.body || {};
+        const { fullName, email, password, role } = req.body || {};
 
-            if (!fullName || !email || !password || !role) {
-                return res.status(400).json({ error: "fullName, email, password, and role are all required" });
-            }
-
-            if (!SELF_SERVICE_ROLES.includes(role)) {
-                return res.status(400).json({ error: "Invalid role" });
-            }
-
-            if (String(password).length < 8) {
-                return res.status(400).json({ error: "Password must be at least 8 characters" });
-            }
-
-            const existing = await this.userRepository.getUserByEmail(email);
-
-            if (existing) {
-                return res.status(409).json({ error: "An account with this email already exists" });
-            }
-
-            const passwordHash = await bcrypt.hash(password, 10);
-
-            const user = await this.userRepository.createUser({
-                fullName: String(fullName).trim(),
-                email: String(email).trim().toLowerCase(),
-                passwordHash,
-                role
-            });
-
-            const token = signToken(user);
-
-            res.status(201).json({ token, user: sanitize(user) });
+        if (!fullName || !email || !password || !role) {
+            return res.status(400).json({ error: "fullName, email, password, and role are all required" });
         }
-        catch (error) {
-            console.error(error);
-            res.status(500).json({ error: "Failed to register" });
+
+        if (!SELF_SERVICE_ROLES.includes(role)) {
+            return res.status(400).json({ error: "Invalid role" });
         }
+
+        if (String(password).length < 8) {
+            return res.status(400).json({ error: "Password must be at least 8 characters" });
+        }
+
+        const existing = await this.userRepository.getUserByEmail(email);
+
+        if (existing) {
+            return res.status(409).json({ error: "An account with this email already exists" });
+        }
+
+        const passwordHash = await bcrypt.hash(password, 10);
+
+        const user = await this.userRepository.createUser({
+            fullName: String(fullName).trim(),
+            email: String(email).trim().toLowerCase(),
+            passwordHash,
+            role
+        });
+
+        const token = signToken(user);
+
+        res.status(201).json({ token, user: sanitize(user) });
     };
 
 
     login = async (req, res) => {
-        try {
-            const { email, password } = req.body || {};
+        const { email, password } = req.body || {};
 
-            if (!email || !password) {
-                return res.status(400).json({ error: "email and password are required" });
-            }
-
-            const user = await this.userRepository.getUserByEmail(String(email).trim().toLowerCase());
-
-            if (!user || !user.password_hash || !user.is_active) {
-                return res.status(401).json({ error: "Invalid email or password" });
-            }
-
-            const matches = await bcrypt.compare(password, user.password_hash);
-
-            if (!matches) {
-                return res.status(401).json({ error: "Invalid email or password" });
-            }
-
-            const token = signToken(user);
-
-            res.json({ token, user: sanitize(user) });
+        if (!email || !password) {
+            return res.status(400).json({ error: "email and password are required" });
         }
-        catch (error) {
-            console.error(error);
-            res.status(500).json({ error: "Failed to log in" });
+
+        const user = await this.userRepository.getUserByEmail(String(email).trim().toLowerCase());
+
+        if (!user || !user.password_hash || !user.is_active) {
+            return res.status(401).json({ error: "Invalid email or password" });
         }
+
+        const matches = await bcrypt.compare(password, user.password_hash);
+
+        if (!matches) {
+            return res.status(401).json({ error: "Invalid email or password" });
+        }
+
+        const token = signToken(user);
+
+        res.json({ token, user: sanitize(user) });
     };
 
 
     me = async (req, res) => {
-        try {
-            const user = await this.userRepository.getUserById(req.user.id);
+        const user = await this.userRepository.getUserById(req.user.id);
 
-            if (!user) {
-                return res.status(404).json({ error: "User not found" });
-            }
+        if (!user) {
+            return res.status(404).json({ error: "User not found" });
+        }
 
-            res.json(sanitize(user));
-        }
-        catch (error) {
-            console.error(error);
-            res.status(500).json({ error: "Failed to fetch user" });
-        }
+        res.json(sanitize(user));
     };
 
 }

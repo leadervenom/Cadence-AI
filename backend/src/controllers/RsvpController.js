@@ -41,77 +41,115 @@ class RsvpController {
 
 
     getParticipants = async (req, res) => {
-        try {
-            const participants = await this.participantRepository
-                .getParticipantsByEvent(req.params.eventId);
+        const participants = await this.participantRepository
+            .getParticipantsByEvent(req.params.eventId);
 
-            res.json(participants);
-        }
-        catch (error) {
-            console.error(error);
-            res.status(500).json({ error: "Failed to fetch participants" });
-        }
+        res.json(participants);
     };
 
 
     invite = async (req, res) => {
+        const eventId = req.params.eventId;
+        const { vipId, role, email } = req.body || {};
+
+        if (!vipId) {
+            return res.status(400).json({ error: "vipId is required" });
+        }
+
+        if (email) {
+            await this.vipRepository.updateEmail(vipId, email);
+        }
+
+        const vip = await this.vipRepository.getVIPById(vipId);
+
+        if (!vip) {
+            return res.status(404).json({ error: "VIP not found" });
+        }
+
+        if (!vip.email) {
+            return res.status(400).json({ error: "This person has no email on file. Provide one to invite them." });
+        }
+
+        const event = await this.eventRepository.getEventById(eventId);
+
+        if (!event) {
+            return res.status(404).json({ error: "Event not found" });
+        }
+
+        const token = crypto.randomBytes(24).toString("hex");
+
+        const participant = await this.participantRepository.invite({
+            eventId,
+            vipId,
+            role,
+            token
+        });
+
+        const acceptUrl = `${baseUrl()}/api/rsvp/${token}/accept`;
+        const declineUrl = `${baseUrl()}/api/rsvp/${token}/decline`;
+
         try {
-            const eventId = req.params.eventId;
-            const { vipId, role, email } = req.body || {};
-
-            if (!vipId) {
-                return res.status(400).json({ error: "vipId is required" });
-            }
-
-            if (email) {
-                await this.vipRepository.updateEmail(vipId, email);
-            }
-
-            const vip = await this.vipRepository.getVIPById(vipId);
-
-            if (!vip) {
-                return res.status(404).json({ error: "VIP not found" });
-            }
-
-            if (!vip.email) {
-                return res.status(400).json({ error: "This person has no email on file. Provide one to invite them." });
-            }
-
-            const event = await this.eventRepository.getEventById(eventId);
-
-            if (!event) {
-                return res.status(404).json({ error: "Event not found" });
-            }
-
-            const token = crypto.randomBytes(24).toString("hex");
-
-            const participant = await this.participantRepository.invite({
-                eventId,
-                vipId,
-                role,
-                token
+            await this.emailService.sendRsvpInvite({ event, participant, acceptUrl, declineUrl });
+        }
+        catch (emailError) {
+            console.error(emailError);
+            return res.status(502).json({
+                error: `Invite was recorded but the email could not be sent: ${emailError.message}`,
+                participant
             });
-
-            const acceptUrl = `${baseUrl()}/api/rsvp/${token}/accept`;
-            const declineUrl = `${baseUrl()}/api/rsvp/${token}/decline`;
-
-            try {
-                await this.emailService.sendRsvpInvite({ event, participant, acceptUrl, declineUrl });
-            }
-            catch (emailError) {
-                console.error(emailError);
-                return res.status(502).json({
-                    error: `Invite was recorded but the email could not be sent: ${emailError.message}`,
-                    participant
-                });
-            }
-
-            res.status(201).json({ participant });
         }
-        catch (error) {
-            console.error(error);
-            res.status(500).json({ error: "Failed to invite participant" });
+
+        res.status(201).json({ participant });
+    };
+
+
+    updateStatus = async (req, res) => {
+        const { status } = req.body || {};
+        const validStatuses = ["invited", "confirmed", "declined", "absent", "arrived", "attended"];
+
+        if (!validStatuses.includes(status)) {
+            return res.status(400).json({ error: `status must be one of: ${validStatuses.join(", ")}` });
         }
+
+        const updated = await this.participantRepository.updateStatus(req.params.eventVipId, status);
+
+        if (!updated) {
+            return res.status(404).json({ error: "Participant not found" });
+        }
+
+        res.json(updated);
+    };
+
+
+    updateDetails = async (req, res) => {
+        const { eventRole, plusOneName, arrivalTime, departureTime, specialNotes, eventRankOverride } = req.body || {};
+        const fields = {};
+
+        if (eventRole !== undefined) fields.eventRole = eventRole;
+        if (plusOneName !== undefined) fields.plusOneName = plusOneName;
+        if (arrivalTime !== undefined) fields.arrivalTime = arrivalTime;
+        if (departureTime !== undefined) fields.departureTime = departureTime;
+        if (specialNotes !== undefined) fields.specialNotes = specialNotes;
+        if (eventRankOverride !== undefined) fields.eventRankOverride = eventRankOverride;
+
+        const updated = await this.participantRepository.updateDetails(req.params.eventVipId, fields);
+
+        if (!updated) {
+            return res.status(404).json({ error: "Participant not found" });
+        }
+
+        res.json(updated);
+    };
+
+
+    uninvite = async (req, res) => {
+        const deleted = await this.participantRepository.uninvite(req.params.eventVipId);
+
+        if (!deleted) {
+            return res.status(404).json({ error: "Participant not found" });
+        }
+
+        res.status(204).end();
     };
 
 

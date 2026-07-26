@@ -267,6 +267,7 @@ body {
   cursor: pointer;
   transition: background 0.12s;
   border: 1px solid transparent;
+  animation: source-item-in 0.28s ease-out;
 }
 .source-item:hover { background: var(--bg-hover); }
 .source-item.active { background: var(--accent-blue-dim); border-color: var(--border-accent); }
@@ -279,10 +280,53 @@ body {
 }
 .source-badge.parsed { background: var(--accent-green-dim); color: var(--accent-green); }
 .source-badge.uploaded { background: var(--accent-blue-dim); color: var(--accent-blue); }
-.source-badge.processing { background: var(--accent-amber-dim); color: var(--accent-amber); }
+.source-badge.processing { background: var(--accent-amber-dim); color: var(--accent-amber); animation: badge-pulse 1.6s ease-in-out infinite; }
 .source-badge.failed { background: var(--accent-red-dim); color: var(--accent-red); }
 .source-badge.error { background: var(--accent-red-dim); color: var(--accent-red); }
 .source-size { font-size: 10px; color: var(--text-muted); margin-left: auto; flex-shrink: 0; }
+
+.source-progress {
+  height: 3px;
+  border-radius: 3px;
+  background: var(--bg-hover);
+  overflow: hidden;
+  margin-top: 6px;
+}
+.source-progress-bar {
+  height: 100%;
+  border-radius: 3px;
+  background: var(--accent-amber);
+  transition: width 0.35s ease-out;
+}
+.source-progress.indeterminate .source-progress-bar {
+  width: 35%;
+  background: linear-gradient(90deg, transparent, var(--accent-amber), transparent);
+  animation: progress-indeterminate 1.3s ease-in-out infinite;
+}
+.source-progress-pct { font-size: 10px; color: var(--text-muted); margin-top: 2px; display: inline-block; }
+
+@keyframes source-item-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes badge-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.55; } }
+@keyframes progress-indeterminate {
+  0% { transform: translateX(-120%); }
+  100% { transform: translateX(380%); }
+}
+
+/* ── REUSABLE SOFT SPINNER (loading states) ── */
+.spinner {
+  display: inline-block;
+  width: 14px; height: 14px;
+  border: 2px solid var(--border);
+  border-top-color: var(--accent-blue);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  vertical-align: -2px;
+  margin-right: 6px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
 
 /* ── CENTER PANEL: MAIN WORKSPACE ── */
 #center-panel {
@@ -469,6 +513,14 @@ body {
 .ai-msg.assistant .ai-bubble { background: var(--bg-card); border: 1px solid var(--border); color: var(--text-primary); }
 .ai-msg.user .ai-bubble { background: var(--accent-blue); color: #fff; }
 .ai-sender { font-size: 11px; color: var(--text-muted); margin-bottom: 4px; }
+.ai-proposed-action { display: flex; gap: 8px; align-items: center; margin-top: 8px; }
+.ai-action-note { font-size: 12px; color: var(--text-muted); margin-top: 8px; }
+.btn-secondary {
+  background: transparent; color: var(--text-secondary); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 8px 14px; font-size: 12px; cursor: pointer; transition: opacity 0.15s;
+}
+.btn-secondary:hover { opacity: 0.8; }
+.btn-secondary:disabled { cursor: not-allowed; opacity: 0.5; }
 .ai-input-bar {
   display: flex; gap: 10px; margin-top: 16px;
   padding: 14px; background: var(--bg-card); border-radius: var(--radius-lg);

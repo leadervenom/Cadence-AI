@@ -110,13 +110,11 @@ function handleCreateEventError(msg) {
 /*
   Receives updates from AI.
 
-  Backend already applies the command and returns:
+  Backend already applies the change and returns:
   {
     event: updatedEvent,
     command: {...}
   }
-
-  Do not run applyEventCommand here.
 */
 function handleEventUpdated(update) {
   const updatedEvent = update?.event || update;

@@ -80,6 +80,66 @@ class EventRepository {
     }
 
 
+    async updateEvent(eventId, fields) {
+
+        const columnByField = {
+            name: "event_name",
+            type: "event_type",
+            date: "event_date",
+            venue: "venue_name",
+            venueAddress: "venue_address",
+            district: "district",
+            status: "status",
+            startTime: "start_time",
+            endTime: "end_time"
+        };
+
+        const sets = [];
+        const values = [];
+
+        for (const [field, column] of Object.entries(columnByField)) {
+            if (Object.prototype.hasOwnProperty.call(fields, field)) {
+                values.push(fields[field]);
+                sets.push(`${column} = $${values.length}`);
+            }
+        }
+
+        if (sets.length === 0) {
+            return this.getEventById(eventId);
+        }
+
+        values.push(eventId);
+
+        const query = `
+            UPDATE events
+            SET ${sets.join(", ")},
+                updated_at = CURRENT_TIMESTAMP
+            WHERE event_id = $${values.length}
+            RETURNING ${EVENT_SELECT};
+        `;
+
+        const result = await pool.query(query, values);
+
+        return result.rows[0];
+
+    }
+
+
+    async deleteEvent(eventId) {
+
+        const query = `
+            DELETE FROM events
+            WHERE event_id = $1
+            RETURNING event_id AS id;
+        `;
+
+        const result = await pool.query(query, [eventId]);
+
+        return result.rows[0];
+
+    }
+
+
     async updateEventData(eventId, sectionUpdate) {
 
         const query = `

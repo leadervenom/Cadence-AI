@@ -1,6 +1,6 @@
 <script setup>
 import { nextTick, ref, watch } from "vue";
-import { askCadenceAI, getCadenceChat, saveCadenceChat } from "../services/aiChat.js";
+import api from "../services/api.js";
 
 const props = defineProps({
   event: { type: Object, required: true },
@@ -34,13 +34,43 @@ function formatMessage(value) {
   return escapeHtml(value).replace(/\n/g, "<br>");
 }
 
-function addMessage(role, html, persist = true) {
-  messages.value.push({ role, html });
+function addMessage(role, html, persist = true, proposedAction = null) {
+  messages.value.push({ role, html, proposedAction });
   scrollToBottom();
 
   if (persist) {
     persistChat();
   }
+}
+
+const confirmingAction = ref(false);
+
+async function confirmProposedAction(message) {
+  const action = message.proposedAction;
+  if (!action || action.type !== "rsvp_invite" || confirmingAction.value) return;
+
+  confirmingAction.value = true;
+  try {
+    await api.events.invite(action.eventId, {
+      vipId: action.vipId,
+      role: action.role,
+      email: action.email,
+    });
+    message.proposedAction = { ...action, status: "sent" };
+    addMessage("assistant", formatMessage(`Invite sent to ${action.vipName}.`));
+  } catch (err) {
+    message.proposedAction = { ...action, status: "failed" };
+    addMessage("assistant", formatMessage(`Could not send the invite: ${err.message}`));
+  } finally {
+    confirmingAction.value = false;
+    persistChat();
+  }
+}
+
+function cancelProposedAction(message) {
+  if (!message.proposedAction) return;
+  message.proposedAction = { ...message.proposedAction, status: "cancelled" };
+  persistChat();
 }
 
 function addGreeting() {
@@ -56,7 +86,7 @@ async function loadChat() {
   chatHistory.value = [];
 
   try {
-    const chat = await getCadenceChat(props.event.id);
+    const chat = await api.ai.getChat(props.event.id);
     if (token !== loadToken) return;
 
     messages.value = Array.isArray(chat.messages) ? chat.messages : [];
@@ -78,7 +108,7 @@ async function persistChat() {
   if (!props.event?.id) return;
 
   try {
-    await saveCadenceChat(props.event.id, {
+    await api.ai.saveChat(props.event.id, {
       messages: messages.value,
       chatHistory: chatHistory.value,
     });
@@ -102,30 +132,11 @@ async function sendMessage(text) {
   scrollToBottom();
 
   try {
-    const eventCtx = JSON.stringify(
-      {
-        id: props.event.id,
-        name: props.event.name,
-        date: props.event.date,
-        venue: props.event.venue,
-        status: props.event.status,
-        running_order: props.event.running_order,
-        vips: props.event.vips,
-        seating: props.event.seating,
-        sources: props.event.sources.map((s) => ({
-          name: s.name,
-          status: s.status,
-          content: s.content || "",
-        })),
-      },
-      null,
-      2
-    );
-
+    // Event data (including source document content) is assembled
+    // server-side per request — see AIController.buildSystemInstruction /
+    // sourceContextBuilder.js — so only the organizer's own instructions
+    // travel from here.
     const systemPrompt = `${props.event.ai_context}
-
-Current event data:
-${eventCtx}
 
 Be concise, direct, and operational. Use bullet points for lists. Prioritise safety, protocol, and timing.`;
 
@@ -134,22 +145,22 @@ Be concise, direct, and operational. Use bullet points for lists. Prioritise saf
       { role: "user", content: `[Event context provided via system]\n\n${trimmed}` },
     ];
 
-    const response = await askCadenceAI({
+    const response = await api.ai.chat({
       systemPrompt,
       messages: apiMessages,
       event: props.event,
     });
-    const reply = response.reply;
+    const reply = response.reply || "Unable to get a response. Please try again.";
 
     if (response.applied && response.updatedEvent) {
       emit("event-updated", {
         event: response.updatedEvent,
-        command: response.command,
+        command: response.toolCall,
       });
     }
 
     chatHistory.value.push({ role: "assistant", content: reply });
-    addMessage("assistant", formatMessage(reply), false);
+    addMessage("assistant", formatMessage(reply), false, response.proposedAction || null);
 
     persistChat();
   } catch (err) {
@@ -176,6 +187,17 @@ defineExpose({ sendMessage });
       <div v-for="(m, i) in messages" :key="i" class="ai-msg" :class="m.role">
         <div class="ai-sender">{{ m.role === 'assistant' ? 'Cadence AI' : username }}</div>
         <div class="ai-bubble" v-html="m.html"></div>
+        <div v-if="m.proposedAction && m.proposedAction.type === 'rsvp_invite'" class="ai-proposed-action">
+          <template v-if="!m.proposedAction.status || m.proposedAction.status === 'pending'">
+            <button class="btn-primary" type="button" :disabled="confirmingAction" @click="confirmProposedAction(m)">
+              {{ confirmingAction ? "Sending…" : `Confirm invite to ${m.proposedAction.vipName}` }}
+            </button>
+            <button class="btn-secondary" type="button" :disabled="confirmingAction" @click="cancelProposedAction(m)">Cancel</button>
+          </template>
+          <div v-else-if="m.proposedAction.status === 'sent'" class="ai-action-note">Invite sent.</div>
+          <div v-else-if="m.proposedAction.status === 'cancelled'" class="ai-action-note">Cancelled.</div>
+          <div v-else-if="m.proposedAction.status === 'failed'" class="ai-action-note">Send failed.</div>
+        </div>
       </div>
       <div v-if="isTyping" class="ai-msg assistant">
         <div class="ai-sender">Cadence AI</div>

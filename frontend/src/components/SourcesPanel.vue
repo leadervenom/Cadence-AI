@@ -72,6 +72,10 @@ function handleDrop(e) {
         <div class="source-info">
           <div class="source-name" :title="s.name">{{ s.name }}</div>
           <span class="source-badge" :class="s.status">{{ s.status.toUpperCase() }}</span>
+          <div v-if="s.status === 'processing'" class="source-progress" :class="{ indeterminate: s.progress == null }">
+            <div class="source-progress-bar" :style="s.progress != null ? { width: s.progress + '%' } : {}"></div>
+          </div>
+          <span v-if="s.status === 'processing' && s.progress != null" class="source-progress-pct">{{ s.progress }}%</span>
         </div>
         <div class="source-size">{{ s.size }}</div>
       </div>
