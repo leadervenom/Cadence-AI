@@ -1,5 +1,5 @@
 <script setup>
-import { computed, nextTick, ref } from "vue";
+import { computed, nextTick, reactive, ref } from "vue";
 import * as pdfjsLib from "pdfjs-dist";
 import pdfjsWorkerUrl from "pdfjs-dist/build/pdf.worker.mjs?url";
 import mammoth from "mammoth";
@@ -10,6 +10,7 @@ import SeatingTab from "./SeatingTab.vue";
 import RsvpTab from "./RsvpTab.vue";
 import AiChatTab from "./AiChatTab.vue";
 import ModulesPanel from "./ModulesPanel.vue";
+import ErrorBoundary from "./ErrorBoundary.vue";
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorkerUrl;
 
@@ -21,6 +22,7 @@ const GENERATE_RUNNING_ORDER_PROMPT =
 const props = defineProps({
   event: { type: Object, required: true },
   username: { type: String, default: "You" },
+  role: { type: String, default: "viewer" },
 });
 const emit = defineEmits(["toast", "event-updated"]);
 
@@ -104,7 +106,11 @@ async function readSourceContent(file, onProgress) {
 async function handleUpload(files = []) {
   for (const file of files) {
     const ext = fileTypeFor(file);
-    const newSource = {
+    // reactive() here matters: newSource is mutated below *after* being pushed into
+    // event.sources. If it were a plain object, those later writes would land on the
+    // raw target instead of the array's reactive proxy and never trigger a re-render,
+    // leaving the badge stuck on "processing" until some unrelated state change forced one.
+    const newSource = reactive({
       name: file.name,
       size: readableSize(file.size),
       status: "processing",
@@ -113,7 +119,7 @@ async function handleUpload(files = []) {
       // Only PDFs report real per-page progress; other formats parse in one shot
       // so we show an indeterminate animation instead of a fabricated percentage.
       progress: ext === "pdf" ? 0 : null,
-    };
+    });
     props.event.sources.unshift(newSource);
     emit("toast", "Uploading " + file.name);
 
@@ -180,28 +186,38 @@ function handleEventUpdated(update) {
       </div>
 
       <div class="module-content" :class="{ active: activeTab === 'running-order' }">
-        <RunningOrderTab :rows="event.running_order" :sources="event.sources" @generate="handleGenerateRunningOrder" />
+        <ErrorBoundary label="Running Order">
+          <RunningOrderTab :rows="event.running_order" :sources="event.sources" @generate="handleGenerateRunningOrder" />
+        </ErrorBoundary>
       </div>
 
       <div class="module-content" :class="{ active: activeTab === 'vip-list' }">
-        <VipListTab :vips="event.vips" />
+        <ErrorBoundary label="VIP List">
+          <VipListTab :vips="event.vips" />
+        </ErrorBoundary>
       </div>
 
       <div class="module-content" :class="{ active: activeTab === 'seating' }">
-        <SeatingTab :seating="event.seating" />
+        <ErrorBoundary label="Layouts">
+          <SeatingTab :event="event" :role="role" @toast="(msg) => emit('toast', msg)" />
+        </ErrorBoundary>
       </div>
 
       <div class="module-content" :class="{ active: activeTab === 'rsvp' }">
-        <RsvpTab :event="event" @toast="(msg) => emit('toast', msg)" />
+        <ErrorBoundary label="RSVP">
+          <RsvpTab :event="event" @toast="(msg) => emit('toast', msg)" />
+        </ErrorBoundary>
       </div>
 
       <div class="module-content" :class="{ 'chat-active': activeTab === 'ai-chat', active: activeTab === 'ai-chat' }">
-        <AiChatTab
-          ref="aiChatRef"
-          :event="event"
-          :username="username"
-          @event-updated="handleEventUpdated"
-        />
+        <ErrorBoundary label="AI Assistant">
+          <AiChatTab
+            ref="aiChatRef"
+            :event="event"
+            :username="username"
+            @event-updated="handleEventUpdated"
+          />
+        </ErrorBoundary>
       </div>
     </div>
 

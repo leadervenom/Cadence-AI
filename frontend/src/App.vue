@@ -1,10 +1,12 @@
 <script setup>
 import { onMounted, ref, watch } from "vue";
 import AuthScreen from "./components/AuthScreen.vue";
+import AcceptInviteScreen from "./components/AcceptInviteScreen.vue";
 import TopBar from "./components/TopBar.vue";
 import EventsView from "./components/EventsView.vue";
 import WorkspaceView from "./components/WorkspaceView.vue";
 import CreateEventModal from "./components/CreateEventModal.vue";
+import InviteOrganizerModal from "./components/InviteOrganizerModal.vue";
 import ToastNotification from "./components/ToastNotification.vue";
 import api from "./services/api.js";
 import { isAuthed, logout as clearSession } from "./services/authStore.js";
@@ -14,6 +16,10 @@ const events = ref([]);
 const currentEvent = ref(null);
 const modalOpen = ref(false);
 const restoringSession = ref(true);
+
+const inviteToken = ref(new URLSearchParams(window.location.search).get("invite"));
+const inviteModalOpen = ref(false);
+const inviteEventId = ref(null);
 
 async function loadEvents() {
   try {
@@ -54,6 +60,7 @@ function showToast(msg) {
 
 function handleLogin(user) {
   currentUser.value = user;
+  if (inviteToken.value) clearInviteTokenFromUrl();
 }
 
 function handleLoginError(msg) {
@@ -106,6 +113,38 @@ function handleCreateEventError(msg) {
   showToast(msg);
 }
 
+function openInviteModal(eventId) {
+  inviteEventId.value = eventId;
+  inviteModalOpen.value = true;
+}
+
+function closeInviteModal() {
+  inviteModalOpen.value = false;
+  inviteEventId.value = null;
+}
+
+async function handleInviteOrganizer(email) {
+  try {
+    const result = await api.events.inviteOrganizer(inviteEventId.value, email);
+    showToast(result.status === "assigned" ? `${email} added to this event` : `Invite sent to ${email}`);
+    inviteModalOpen.value = false;
+    inviteEventId.value = null;
+  } catch (err) {
+    showToast("Could not invite organizer: " + err.message);
+  }
+}
+
+function handleInviteOrganizerError(msg) {
+  showToast(msg);
+}
+
+function clearInviteTokenFromUrl() {
+  const url = new URL(window.location.href);
+  url.searchParams.delete("invite");
+  window.history.replaceState({}, "", url);
+  inviteToken.value = null;
+}
+
 
 /*
   Receives updates from AI.
@@ -150,6 +189,13 @@ function handleEventUpdated(update) {
 <template>
   <div v-if="restoringSession"></div>
 
+  <AcceptInviteScreen
+    v-else-if="!currentUser && inviteToken"
+    :token="inviteToken"
+    @login="handleLogin"
+    @login-error="handleLoginError"
+  />
+
   <AuthScreen
     v-else-if="!currentUser"
     @login="handleLogin"
@@ -171,8 +217,10 @@ function handleEventUpdated(update) {
       <EventsView
         v-if="!currentEvent"
         :events="events"
+        :role="currentUser.role"
         @open-event="openEvent"
         @create-event-click="openCreateModal"
+        @invite-organizer="openInviteModal"
       />
 
 
@@ -180,6 +228,7 @@ function handleEventUpdated(update) {
         v-else
         :event="currentEvent"
         :username="currentUser.fullName"
+        :role="currentUser.role"
         @toast="showToast"
         @event-updated="handleEventUpdated"
       />
@@ -194,6 +243,14 @@ function handleEventUpdated(update) {
     @close="closeCreateModal"
     @create="handleCreateEvent"
     @create-error="handleCreateEventError"
+  />
+
+
+  <InviteOrganizerModal
+    :open="inviteModalOpen"
+    @close="closeInviteModal"
+    @invite="handleInviteOrganizer"
+    @invite-error="handleInviteOrganizerError"
   />
 
 

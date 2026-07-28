@@ -140,8 +140,13 @@ async function sendMessage(text) {
 
 Be concise, direct, and operational. Use bullet points for lists. Prioritise safety, protocol, and timing.`;
 
+    // Cap how much prior chat gets replayed to the model. Sending the entire
+    // history back on every turn means old failed/confused replies keep
+    // getting fed back in as context, anchoring the model into repeating them
+    // instead of trying fresh — capping to recent turns avoids that snowball.
+    const HISTORY_TURNS_LIMIT = 12;
     const apiMessages = [
-      ...chatHistory.value.slice(0, -1),
+      ...chatHistory.value.slice(0, -1).slice(-HISTORY_TURNS_LIMIT),
       { role: "user", content: `[Event context provided via system]\n\n${trimmed}` },
     ];
 

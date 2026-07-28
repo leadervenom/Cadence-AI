@@ -8,6 +8,7 @@ const controller = new AuthController();
 
 router.post("/register", asyncHandler(controller.register));
 router.post("/login", asyncHandler(controller.login));
+router.post("/accept-invite", asyncHandler(controller.acceptInvite));
 router.get("/me", authMiddleware, asyncHandler(controller.me));
 
 export default router;

@@ -1,5 +1,5 @@
 import { appendItem, updateItem, deleteItem, replaceSection, findItem } from "./collectionHelpers.js";
-import { persistSection } from "./sectionPersistence.js";
+import { persistSection } from "../../services/sectionPersistence.js";
 
 // This is the per-event JSONB `vips` list (protocol/seating display order),
 // distinct from the master `vip_profiles` directory — see vipDirectoryTools.js.

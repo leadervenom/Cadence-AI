@@ -107,28 +107,33 @@ class EventParticipantRepository {
     }
 
 
-    async updateStatus(eventVipId, status) {
-
-        await pool.query(
-            `UPDATE event_vips
-             SET attendance_status = $2, responded_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP
-             WHERE event_vip_id = $1;`,
-            [eventVipId, status]
-        );
+    async updateStatus(eventId, eventVipId, status) {
 
         const updated = await pool.query(
+            `UPDATE event_vips
+             SET attendance_status = $3, responded_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP
+             WHERE event_vip_id = $1 AND event_id = $2
+             RETURNING event_vip_id;`,
+            [eventVipId, eventId, status]
+        );
+
+        if (!updated.rows[0]) {
+            return null;
+        }
+
+        const result = await pool.query(
             `SELECT ${PARTICIPANT_SELECT} FROM event_vips ev
              JOIN vip_profiles vp ON vp.vip_id = ev.vip_id
              WHERE ev.event_vip_id = $1;`,
             [eventVipId]
         );
 
-        return updated.rows[0];
+        return result.rows[0];
 
     }
 
 
-    async updateDetails(eventVipId, fields) {
+    async updateDetails(eventId, eventVipId, fields) {
 
         const columnByField = {
             eventRole: "event_role",
@@ -153,43 +158,48 @@ class EventParticipantRepository {
             const existing = await pool.query(
                 `SELECT ${PARTICIPANT_SELECT} FROM event_vips ev
                  JOIN vip_profiles vp ON vp.vip_id = ev.vip_id
-                 WHERE ev.event_vip_id = $1;`,
-                [eventVipId]
+                 WHERE ev.event_vip_id = $1 AND ev.event_id = $2;`,
+                [eventVipId, eventId]
             );
 
-            return existing.rows[0];
+            return existing.rows[0] || null;
         }
 
-        values.push(eventVipId);
+        values.push(eventVipId, eventId);
 
-        await pool.query(
+        const updated = await pool.query(
             `UPDATE event_vips
              SET ${sets.join(", ")}, updated_at = CURRENT_TIMESTAMP
-             WHERE event_vip_id = $${values.length};`,
+             WHERE event_vip_id = $${values.length - 1} AND event_id = $${values.length}
+             RETURNING event_vip_id;`,
             values
         );
 
-        const updated = await pool.query(
+        if (!updated.rows[0]) {
+            return null;
+        }
+
+        const result = await pool.query(
             `SELECT ${PARTICIPANT_SELECT} FROM event_vips ev
              JOIN vip_profiles vp ON vp.vip_id = ev.vip_id
              WHERE ev.event_vip_id = $1;`,
             [eventVipId]
         );
 
-        return updated.rows[0];
+        return result.rows[0];
 
     }
 
 
-    async uninvite(eventVipId) {
+    async uninvite(eventId, eventVipId) {
 
         const query = `
             DELETE FROM event_vips
-            WHERE event_vip_id = $1
+            WHERE event_vip_id = $1 AND event_id = $2
             RETURNING event_vip_id;
         `;
 
-        const result = await pool.query(query, [eventVipId]);
+        const result = await pool.query(query, [eventVipId, eventId]);
 
         return result.rows[0];
 

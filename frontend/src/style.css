@@ -213,6 +213,14 @@ body {
 .status-dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
 .live .status-dot { animation: pulse-dot 2s infinite; }
 .card-arrow { color: var(--text-muted); font-size: 18px; }
+.card-top-actions { display: flex; align-items: center; gap: 8px; }
+.card-invite-btn {
+  display: flex; align-items: center; justify-content: center;
+  width: 24px; height: 24px; border-radius: 6px;
+  background: var(--bg-hover); border: 1px solid var(--border-accent);
+  color: var(--text-secondary); cursor: pointer; padding: 0;
+}
+.card-invite-btn:hover { color: var(--accent-blue); border-color: var(--accent-blue); }
 .event-card h3 { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
 .event-card .event-desc { font-size: 12px; color: var(--text-secondary); margin-bottom: 14px; }
 .event-meta { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-muted); }
@@ -478,7 +486,103 @@ body {
 .seat.royalty { background: rgba(245,158,11,0.15); color: var(--accent-amber); border-color: rgba(245,158,11,0.25); }
 .seat.vvip { background: rgba(239,68,68,0.1); color: var(--accent-red); border-color: rgba(239,68,68,0.2); }
 .seat.vip { background: var(--accent-blue-dim); color: var(--accent-blue); border-color: var(--border-accent); }
+.seat.official { background: var(--accent-green-dim); color: var(--accent-green); }
+.seat.guest { background: rgba(148,163,184,0.15); color: var(--text-secondary); }
 .seat.empty { background: rgba(255,255,255,0.03); color: var(--text-muted); border-color: var(--border); border-style: dashed; }
+
+/* Seating editor — toolbar */
+.seating-toolbar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.seating-toolbar .btn-icon { font-size: 12px; padding: 7px 12px; }
+.seating-save-indicator { font-size: 11px; color: var(--text-muted); margin-left: auto; white-space: nowrap; }
+.seating-save-indicator.saving { color: var(--accent-amber); }
+.seating-save-indicator.saved { color: var(--accent-green); }
+.seating-readonly-badge {
+  font-size: 10px; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase;
+  color: var(--text-muted); background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border); border-radius: 20px; padding: 3px 10px;
+}
+.seating-inline-prompt {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  background: var(--bg-panel); border: 1px solid var(--border-accent);
+  border-radius: var(--radius-md); padding: 10px 12px;
+}
+.seating-inline-prompt-title { font-size: 12px; color: var(--text-secondary); white-space: nowrap; }
+.seating-inline-prompt .form-input { flex: 1; min-width: 160px; }
+.seating-inline-prompt-actions { display: flex; gap: 6px; margin-left: auto; }
+.seating-danger-btn { color: var(--accent-red); border-color: rgba(239,68,68,0.35); }
+.seating-danger-btn:hover { background: var(--accent-red-dim); }
+
+/* Seating editor — SVG canvas */
+.seating-canvas-editor {
+  position: relative;
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); min-height: 460px;
+  overflow: hidden;
+}
+.seating-svg { width: 100%; height: 460px; display: block; touch-action: none; }
+.seat-table-group { cursor: grab; }
+.seat-table-group.dragging { cursor: grabbing; }
+.seat-table-shape {
+  fill: var(--bg-panel); stroke: var(--border); stroke-width: 0.6;
+  transition: stroke 0.12s;
+}
+.seat-table-group:hover .seat-table-shape { stroke: var(--border-accent); }
+.seat-table-label-text {
+  fill: var(--text-secondary); font-size: 3px; font-weight: 600;
+  text-anchor: middle; font-family: var(--font); pointer-events: none;
+}
+.seat-facing-tick { stroke: var(--accent-blue); stroke-width: 0.6; opacity: 0.7; }
+
+.seat-chair-shape {
+  fill: rgba(255,255,255,0.03); stroke: var(--border); stroke-width: 0.5;
+  cursor: pointer; transition: stroke 0.12s, fill 0.12s;
+}
+.seat-chair-shape:hover { stroke: var(--accent-blue); }
+.seat-chair-shape.royalty { fill: rgba(245,158,11,0.18); stroke: rgba(245,158,11,0.45); }
+.seat-chair-shape.vvip { fill: rgba(239,68,68,0.15); stroke: rgba(239,68,68,0.4); }
+.seat-chair-shape.vip { fill: rgba(59,130,246,0.18); stroke: rgba(59,130,246,0.4); }
+.seat-chair-shape.official { fill: rgba(16,185,129,0.16); stroke: rgba(16,185,129,0.4); }
+.seat-chair-shape.guest { fill: rgba(148,163,184,0.16); stroke: rgba(148,163,184,0.35); }
+.seat-chair-shape.empty { fill: rgba(255,255,255,0.02); stroke: var(--border); stroke-dasharray: 1 1; }
+.seat-chair-label {
+  fill: var(--text-primary); font-size: 2.6px; text-anchor: middle;
+  font-family: var(--font); pointer-events: none;
+}
+
+/* Seating editor — chair assignment popover */
+.seat-popover {
+  position: absolute; z-index: 30; width: 220px;
+  background: var(--bg-panel); border: 1px solid var(--border);
+  border-radius: var(--radius-md); padding: 12px;
+  box-shadow: 0 12px 32px rgba(0,0,0,0.5);
+  display: flex; flex-direction: column; gap: 8px;
+}
+.seat-popover .form-input { width: 100%; }
+.seat-popover-results { max-height: 150px; overflow-y: auto; display: flex; flex-direction: column; gap: 2px; }
+.seat-popover-option {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  padding: 6px 8px; border-radius: var(--radius-sm); cursor: pointer;
+  font-size: 12px; color: var(--text-primary); background: none; border: none;
+  text-align: left; font-family: var(--font); width: 100%;
+}
+.seat-popover-option:hover { background: var(--bg-hover); }
+.seat-popover-option .vip-title { color: var(--text-muted); font-size: 10px; }
+.seat-popover-empty { font-size: 12px; color: var(--text-muted); padding: 4px 2px; }
+.seat-popover-clear {
+  color: var(--accent-red); font-size: 11px; background: none; border: none;
+  cursor: pointer; text-align: left; padding: 4px 2px; font-family: var(--font);
+}
+
+/* Error boundary */
+.error-boundary-fallback {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 10px; padding: 60px 20px; text-align: center;
+  background: var(--bg-card); border: 1px dashed var(--border);
+  border-radius: var(--radius-lg); color: var(--text-muted); min-height: 260px;
+}
+.error-boundary-fallback i { font-size: 24px; color: var(--accent-red); }
+.error-boundary-fallback p { font-size: 13px; }
+.error-boundary-fallback .btn-secondary { width: auto; }
 
 /* Stage & Cue Board */
 .cue-list { display: flex; flex-direction: column; gap: 10px; }

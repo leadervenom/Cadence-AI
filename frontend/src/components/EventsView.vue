@@ -4,8 +4,9 @@ import EventCard from "./EventCard.vue";
 
 const props = defineProps({
   events: { type: Array, required: true },
+  role: { type: String, default: "viewer" },
 });
-const emit = defineEmits(["open-event", "create-event-click"]);
+const emit = defineEmits(["open-event", "create-event-click", "invite-organizer"]);
 
 const search = ref("");
 
@@ -28,7 +29,7 @@ const filteredEvents = computed(() => {
         <i class="ti ti-search"></i>
         <input type="text" placeholder="Search events…" v-model="search">
       </div>
-      <button class="btn-new" type="button" @click="$emit('create-event-click')">
+      <button v-if="role === 'admin'" class="btn-new" type="button" @click="$emit('create-event-click')">
         <i class="ti ti-plus" style="font-size:15px"></i> New Event
       </button>
     </div>
@@ -37,7 +38,9 @@ const filteredEvents = computed(() => {
         v-for="ev in filteredEvents"
         :key="ev.id"
         :event="ev"
+        :is-admin="role === 'admin'"
         @open="(id) => $emit('open-event', id)"
+        @invite-organizer="(id) => $emit('invite-organizer', id)"
       />
     </div>
     <div v-if="!filteredEvents.length" class="empty-state" style="grid-column:1/-1">

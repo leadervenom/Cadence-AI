@@ -1,13 +1,18 @@
 import EventRepository from "../repositories/EventRepository.js";
+import EventAssignmentRepository from "../repositories/EventAssignmentRepository.js";
 
 class EventController {
 
     constructor() {
         this.eventRepository = new EventRepository();
+        this.eventAssignmentRepository = new EventAssignmentRepository();
     }
 
     getAllEvents = async (req, res) => {
-        const events = await this.eventRepository.getAllEvents();
+        const events = req.user?.role === "admin"
+            ? await this.eventRepository.getAllEvents()
+            : await this.eventAssignmentRepository.getEventsForUser(req.user.id);
+
         res.json(events);
     };
 

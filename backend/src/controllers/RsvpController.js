@@ -111,7 +111,7 @@ class RsvpController {
             return res.status(400).json({ error: `status must be one of: ${validStatuses.join(", ")}` });
         }
 
-        const updated = await this.participantRepository.updateStatus(req.params.eventVipId, status);
+        const updated = await this.participantRepository.updateStatus(req.params.eventId, req.params.eventVipId, status);
 
         if (!updated) {
             return res.status(404).json({ error: "Participant not found" });
@@ -132,7 +132,7 @@ class RsvpController {
         if (specialNotes !== undefined) fields.specialNotes = specialNotes;
         if (eventRankOverride !== undefined) fields.eventRankOverride = eventRankOverride;
 
-        const updated = await this.participantRepository.updateDetails(req.params.eventVipId, fields);
+        const updated = await this.participantRepository.updateDetails(req.params.eventId, req.params.eventVipId, fields);
 
         if (!updated) {
             return res.status(404).json({ error: "Participant not found" });
@@ -143,7 +143,7 @@ class RsvpController {
 
 
     uninvite = async (req, res) => {
-        const deleted = await this.participantRepository.uninvite(req.params.eventVipId);
+        const deleted = await this.participantRepository.uninvite(req.params.eventId, req.params.eventVipId);
 
         if (!deleted) {
             return res.status(404).json({ error: "Participant not found" });

@@ -48,6 +48,11 @@ export const api = {
         body: JSON.stringify({ email, password }),
       }),
     me: () => request("/api/auth/me"),
+    acceptInvite: (payload) =>
+      request("/api/auth/accept-invite", {
+        method: "POST",
+        body: JSON.stringify(payload),
+      }),
   },
   ai: {
     getStatus: () => request("/api/ai"),
@@ -81,6 +86,18 @@ export const api = {
       request(`/api/events/${encodeURIComponent(id)}/invite`, {
         method: "POST",
         body: JSON.stringify(payload),
+      }),
+    inviteOrganizer: (id, email) =>
+      request(`/api/events/${encodeURIComponent(id)}/organizers/invite`, {
+        method: "POST",
+        body: JSON.stringify({ email }),
+      }),
+  },
+  seating: {
+    update: (eventId, seating) =>
+      request(`/api/events/${encodeURIComponent(eventId)}/seating`, {
+        method: "PUT",
+        body: JSON.stringify(seating),
       }),
   },
 };

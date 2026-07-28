@@ -1,8 +1,9 @@
 <script setup>
 defineProps({
   event: { type: Object, required: true },
+  isAdmin: { type: Boolean, default: false },
 });
-defineEmits(["open"]);
+defineEmits(["open", "invite-organizer"]);
 
 function capitalize(s) {
   return s.charAt(0).toUpperCase() + s.slice(1);
@@ -16,7 +17,18 @@ function capitalize(s) {
         <span class="status-dot"></span>
         {{ capitalize(event.status) }}
       </span>
-      <i class="ti ti-chevron-right card-arrow"></i>
+      <div class="card-top-actions">
+        <button
+          v-if="isAdmin"
+          class="card-invite-btn"
+          type="button"
+          title="Invite Event Organizer"
+          @click.stop="$emit('invite-organizer', event.id)"
+        >
+          <i class="ti ti-user-plus" style="font-size:14px"></i>
+        </button>
+        <i class="ti ti-chevron-right card-arrow"></i>
+      </div>
     </div>
     <h3>{{ event.name }}</h3>
     <div class="event-desc">{{ event.type }}</div>

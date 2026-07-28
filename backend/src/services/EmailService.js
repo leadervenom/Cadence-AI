@@ -56,6 +56,34 @@ function buildInviteHtml({ event, participant, acceptUrl, declineUrl }) {
 </div>`.trim();
 }
 
+function buildOrganizerInviteHtml({ event, signupUrl }) {
+    return `
+<div style="font-family: system-ui, -apple-system, sans-serif; max-width: 480px; margin: 0 auto; padding: 28px; color: #1f2937;">
+    <h2 style="margin: 0 0 4px; font-size: 20px;">You've Been Invited as an Event Organizer</h2>
+    <p style="color: #6b7280; margin: 0 0 20px; font-size: 15px;">${event.name}</p>
+
+    <p style="font-size: 14px; line-height: 1.6;">Set up your account to start managing this event on Cadence AI.</p>
+
+    <div style="text-align: center; margin: 28px 0;">
+        <a href="${signupUrl}" style="display: inline-block; background: #2563eb; color: #ffffff; text-decoration: none; padding: 12px 28px; border-radius: 8px; font-weight: 600; font-size: 14px;">Set Up Account</a>
+    </div>
+
+    <p style="color: #9ca3af; font-size: 12px; margin-top: 24px;">Sent via Cadence AI Event Operations.</p>
+</div>`.trim();
+}
+
+function buildOrganizerAssignedHtml({ event }) {
+    return `
+<div style="font-family: system-ui, -apple-system, sans-serif; max-width: 480px; margin: 0 auto; padding: 28px; color: #1f2937;">
+    <h2 style="margin: 0 0 4px; font-size: 20px;">You've Been Added as an Event Organizer</h2>
+    <p style="color: #6b7280; margin: 0 0 20px; font-size: 15px;">${event.name}</p>
+
+    <p style="font-size: 14px; line-height: 1.6;">This event now appears on your Cadence AI dashboard.</p>
+
+    <p style="color: #9ca3af; font-size: 12px; margin-top: 24px;">Sent via Cadence AI Event Operations.</p>
+</div>`.trim();
+}
+
 class EmailService {
 
     async sendRsvpInvite({ event, participant, acceptUrl, declineUrl }) {
@@ -71,6 +99,40 @@ class EmailService {
             subject: `Invitation: ${event.name}`,
             text: `You are invited to ${event.name}.\n\nAccept: ${acceptUrl}\nDecline: ${declineUrl}`,
             html: buildInviteHtml({ event, participant, acceptUrl, declineUrl })
+        });
+    }
+
+
+    async sendOrganizerInvite({ event, email, signupUrl }) {
+        const transport = getTransporter();
+
+        if (!transport) {
+            throw transporterError;
+        }
+
+        await transport.sendMail({
+            from: process.env.SMTP_FROM || process.env.SMTP_USER,
+            to: email,
+            subject: `You're invited to organize: ${event.name}`,
+            text: `You've been invited to organize ${event.name} on Cadence AI.\n\nSet up your account: ${signupUrl}`,
+            html: buildOrganizerInviteHtml({ event, signupUrl })
+        });
+    }
+
+
+    async sendOrganizerAssigned({ event, user }) {
+        const transport = getTransporter();
+
+        if (!transport) {
+            throw transporterError;
+        }
+
+        await transport.sendMail({
+            from: process.env.SMTP_FROM || process.env.SMTP_USER,
+            to: user.email,
+            subject: `You've been added to: ${event.name}`,
+            text: `You've been added as an Event Organizer for ${event.name} on Cadence AI.`,
+            html: buildOrganizerAssignedHtml({ event })
         });
     }
 

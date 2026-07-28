@@ -1,5 +1,5 @@
 import { appendItem, updateItem, deleteItem, replaceSection, findItem } from "./collectionHelpers.js";
-import { persistSection } from "./sectionPersistence.js";
+import { persistSection } from "../../services/sectionPersistence.js";
 
 const SECTION = "running_order";
 

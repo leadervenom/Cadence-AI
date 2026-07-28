@@ -118,7 +118,10 @@ class AIController {
                     contents,
                     tools: [{ functionDeclarations: allDeclarations }],
                     generationConfig: {
-                        maxOutputTokens: 1000
+                        // Generating a full running_order/vips array as a function-call
+                        // argument can run well past a short cap, truncating the response
+                        // before a valid functionCall part is ever produced.
+                        maxOutputTokens: 8192
                     }
                 })
             }
@@ -146,6 +149,17 @@ class AIController {
                 toolCall: null,
                 applied: false,
                 database: { updated: false, reason: "No tool was called." },
+                updatedEvent: null,
+                proposedAction: null
+            });
+        }
+
+        if (req.user?.role === "viewer") {
+            return res.json({
+                reply: "Your account has read-only access, so I can't make that change for you.",
+                toolCall: { name: functionCallPart.functionCall.name, args: functionCallPart.functionCall.args },
+                applied: false,
+                database: { updated: false, reason: "User role does not permit write actions." },
                 updatedEvent: null,
                 proposedAction: null
             });

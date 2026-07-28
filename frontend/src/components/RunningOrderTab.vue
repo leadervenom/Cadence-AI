@@ -43,7 +43,7 @@ const hasParsedContent = computed(() => props.sources.some((s) => s.content));
             <div class="activity-loc">{{ row.loc }}</div>
           </td>
           <td class="role-col">{{ row.role }}</td>
-          <td><span class="row-status" :class="row.status">{{ row.status.replace('-', ' ').toUpperCase() }}</span></td>
+          <td><span class="row-status" :class="row.status">{{ (row.status || "").replace('-', ' ').toUpperCase() }}</span></td>
         </tr>
       </tbody>
     </table>

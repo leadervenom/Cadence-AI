@@ -100,7 +100,7 @@ export const handlers = {
             return { ok: false, reply: `That matches more than one participant: ${names}. Which one did you mean?` };
         }
 
-        const updated = await participantRepository.updateStatus(matches[0].event_vip_id, args.status);
+        const updated = await participantRepository.updateStatus(context.event.id, matches[0].event_vip_id, args.status);
 
         return { ok: true, persisted: true, reply: `Set ${updated.full_name}'s status to ${args.status}.` };
     },
@@ -119,7 +119,7 @@ export const handlers = {
             return { ok: false, reply: `That matches more than one participant: ${names}. Which one did you mean?` };
         }
 
-        await participantRepository.uninvite(matches[0].event_vip_id);
+        await participantRepository.uninvite(context.event.id, matches[0].event_vip_id);
 
         return { ok: true, persisted: true, reply: `Removed ${matches[0].full_name} from this event's participant list.` };
     }

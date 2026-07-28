@@ -1,24 +1,37 @@
 import { appendItem, updateItem, deleteItem, findItem } from "./collectionHelpers.js";
-import { persistSection } from "./sectionPersistence.js";
+import { persistSection } from "../../services/sectionPersistence.js";
 
 const SECTION = "seating";
 
 const SEAT_SCHEMA = {
     type: "OBJECT",
     properties: {
-        label: { type: "STRING" },
-        cat: { type: "STRING", description: "Seat category, e.g. vip, guest, reserved." }
+        vipId: { type: "STRING", description: "id of an entry in this event's VIP list (event.vips[].id) to seat here. Omit for a freeform seat." },
+        name: { type: "STRING", description: "Freeform occupant name when not bound to a VIP list entry (e.g. press, staff). Ignored if vipId is set." },
+        cat: { type: "STRING", description: "Category for a freeform seat's color: royalty, vvip, vip, official, or guest. Ignored if vipId is set." }
+    }
+};
+
+const ELEMENT_SCHEMA = {
+    type: "OBJECT",
+    properties: {
+        type: { type: "STRING", description: "'round' (banquet table, seats evenly spaced around the full circle) or 'panel' (head table for a podcast/panel session — seats in a line, all facing the same single direction toward the audience)." },
+        label: { type: "STRING", description: "Table label, e.g. 'Table 1' or 'Main Stage'." },
+        x: { type: "NUMBER", description: "Horizontal position, 0-100 as a percentage of the canvas width." },
+        y: { type: "NUMBER", description: "Vertical position, 0-100 as a percentage of the canvas height." },
+        rotation: { type: "NUMBER", description: "Degrees. For a 'panel' table this is the direction every seat faces." },
+        seats: { type: "ARRAY", items: SEAT_SCHEMA }
     },
-    required: ["label"]
+    required: ["type", "x", "y", "seats"]
 };
 
 const LAYOUT_SCHEMA = {
     type: "OBJECT",
     properties: {
         name: { type: "STRING" },
-        rows: { type: "ARRAY", items: { type: "ARRAY", items: SEAT_SCHEMA } }
+        elements: { type: "ARRAY", items: ELEMENT_SCHEMA, description: "The tables in this layout." }
     },
-    required: ["name", "rows"]
+    required: ["name", "elements"]
 };
 
 export const declarations = [
@@ -29,7 +42,7 @@ export const declarations = [
     },
     {
         name: "update_seating_layout",
-        description: "Change fields on ONE existing seating layout (e.g. rename it or replace its rows). Only send fields that should change.",
+        description: "Change fields on ONE existing seating layout (e.g. rename it or replace its elements/tables). Only send fields that should change.",
         parameters: {
             type: "OBJECT",
             properties: {

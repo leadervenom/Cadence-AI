@@ -1,6 +1,8 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import UserRepository from "../repositories/UserRepository.js";
+import EventAssignmentRepository from "../repositories/EventAssignmentRepository.js";
+import OrganizerInviteRepository from "../repositories/OrganizerInviteRepository.js";
 
 const SELF_SERVICE_ROLES = ["event_organizer", "protocol_officer", "usher", "viewer"];
 
@@ -25,6 +27,8 @@ class AuthController {
 
     constructor() {
         this.userRepository = new UserRepository();
+        this.eventAssignmentRepository = new EventAssignmentRepository();
+        this.organizerInviteRepository = new OrganizerInviteRepository();
     }
 
 
@@ -97,6 +101,56 @@ class AuthController {
         }
 
         res.json(sanitize(user));
+    };
+
+
+    acceptInvite = async (req, res) => {
+        const { token, fullName, password } = req.body || {};
+
+        if (!token || !fullName || !password) {
+            return res.status(400).json({ error: "token, fullName, and password are all required" });
+        }
+
+        if (String(password).length < 8) {
+            return res.status(400).json({ error: "Password must be at least 8 characters" });
+        }
+
+        const invite = await this.organizerInviteRepository.getByToken(token);
+
+        if (!invite) {
+            return res.status(404).json({ error: "This invite link is invalid" });
+        }
+
+        if (invite.status !== "pending") {
+            return res.status(409).json({ error: `This invite has already been ${invite.status}` });
+        }
+
+        const existing = await this.userRepository.getUserByEmail(invite.email);
+
+        if (existing) {
+            return res.status(409).json({ error: "An account with this email already exists. Please log in instead." });
+        }
+
+        const passwordHash = await bcrypt.hash(password, 10);
+
+        const user = await this.userRepository.createUser({
+            fullName: String(fullName).trim(),
+            email: invite.email,
+            passwordHash,
+            role: "event_organizer"
+        });
+
+        await this.eventAssignmentRepository.assign({
+            eventId: invite.event_id,
+            userId: user.user_id,
+            assignedBy: invite.invited_by
+        });
+
+        await this.organizerInviteRepository.markAccepted(invite.invite_id);
+
+        const authToken = signToken(user);
+
+        res.status(201).json({ token: authToken, user: sanitize(user) });
     };
 
 }
